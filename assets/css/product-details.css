@@ -1,0 +1,868 @@
+/* =========================================================================
+   PITEX — Product Details page
+   Adds only what utilities.css / style.css / production-lines.css /
+   products.css don't already provide. Reuses: .page-hero* / .breadcrumb-
+   custom / .floating-shape / .gallery-masonry__item (tile) / .lightbox*
+   (production-lines.css — shared with products.html's Line Gallery), .card /
+   .feature-card / .card-icon / .card-title / .card-text (style.css +
+   utilities.css — hover tilt comes free from initCardTilt() in main.js
+   since it targets .feature-card), .product-card (production-lines.css,
+   for Related Products), .cta-band (production-lines.css), .glass-card /
+   .eyebrow / .section-* / buttons (utilities.css — magnetic pull + ripple
+   come free from initMagnetic()/initButtonPremium() in main.js),
+   .particle-field / .ambient-blob (style.css), .gsap-* / .js-anim
+   pre-states (animations.css).
+   NOTE ON MOTION OWNERSHIP: same split as the rest of the site — GSAP
+   (product-details.js) owns every transform; CSS here only owns static
+   layout and non-transform hover affordances.
+   ========================================================================= */
+
+/* ---------- SCROLL PROGRESS BAR ---------- */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  z-index: 1200;
+  pointer-events: none;
+}
+.scroll-progress__fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--primary-light), var(--primary));
+  box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.6);
+  transform-origin: left center;
+}
+
+/* ---------- HERO STATUS BADGE ---------- */
+.hero-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(115deg, var(--primary-light), var(--primary));
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  margin-left: 0.75rem;
+  box-shadow: 0 8px 20px rgba(var(--primary-rgb), 0.4);
+  vertical-align: middle;
+}
+
+/* .floating-shape / .floating-shape--sq moved to production-lines.css
+   (shared hero decoration — also used by products.html now). */
+
+/* =========================================================================
+   PRODUCT SHOWCASE
+   ========================================================================= */
+.showcase-section { position: relative; }
+
+/* This page opens a fullscreen lightbox on click (products.html doesn't),
+   so it gets the zoom cursor as a page-specific addition to the shared
+   .showcase-main component in production-lines.css. */
+.showcase-section .showcase-main { cursor: zoom-in; }
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(2.5rem, 4vw, 4rem);
+  align-items: start;
+}
+
+/* Gallery media column (.showcase-media / .showcase-main / .showcase-nav /
+   .showcase-counter / .showcase-thumbs) now lives in production-lines.css
+   as a shared component — products.html uses it too. Only the zoom hint
+   stays here since it's specific to this page's fullscreen lightbox. */
+/* ---------- Left: thumbnails + main image gallery ---------- */
+.showcase-gallery {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.showcase-gallery .showcase-thumbs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  padding-bottom: 0;
+  padding-right: 0.2rem;
+}
+
+.showcase-hover-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.9rem 0 0 calc(84px + 1rem);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-light);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+}
+.showcase-hover-hint i { color: var(--primary); }
+
+@media (max-width: 767.98px) {
+  .showcase-gallery {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+  .showcase-gallery .showcase-main { order: 1; }
+  .showcase-gallery .showcase-thumbs {
+    order: 2;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: visible;
+    margin-top: 1rem;
+    padding-bottom: 0.35rem;
+    padding-right: 0;
+  }
+  .showcase-hover-hint { margin-left: 0; }
+}
+
+/* ---------- Right: product info panel ---------- */
+.showcase-info { position: relative; }
+
+.showcase-info__category {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.showcase-info__title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--secondary);
+  margin: 0.3rem 0 0;
+}
+
+.showcase-info__desc {
+  margin-top: 1.1rem;
+  color: var(--text-light);
+  font-size: var(--fs-paragraph);
+  line-height: 1.75;
+}
+
+.showcase-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+.status-pill i { font-size: 0.85rem; }
+.status-pill--available { color: #157a4a; background: rgba(21, 122, 74, 0.09); border-color: rgba(21, 122, 74, 0.22); }
+.status-pill--order { color: #b5750a; background: rgba(181, 117, 10, 0.09); border-color: rgba(181, 117, 10, 0.22); }
+.status-pill--export { color: var(--primary); background: rgba(var(--primary-rgb), 0.08); border-color: rgba(var(--primary-rgb), 0.2); }
+.status-pill--warranty { color: var(--secondary); background: rgba(15, 23, 42, 0.05); border-color: var(--border); }
+
+.showcase-icon-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+.showcase-icon-list .feature-item__text { margin: 0; }
+
+.showcase-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Animated section divider moved to utilities.css (assets/css/utilities.css)
+   so it can be reused site-wide without duplication — see .section-divider
+   there. */
+
+/* =========================================================================
+   SPECIFICATIONS
+   ========================================================================= */
+.specs-section { position: relative; }
+
+.specs-grid {
+  margin-top: clamp(2.5rem, 4vw, 3.5rem);
+}
+
+.spec-card {
+  height: 100%;
+  padding: 1.75rem 1.6rem;
+}
+.spec-card .card-icon { margin-bottom: 0; }
+.spec-card__row {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+.spec-card__label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin: 0 0 0.3rem;
+}
+.spec-card__value {
+  display: block;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--secondary);
+  line-height: 1.3;
+}
+
+/* =========================================================================
+   FEATURES
+   ========================================================================= */
+.features-details-section { position: relative; }
+
+.feat-card {
+  height: 100%;
+  padding: 2rem 1.75rem;
+  text-align: left;
+}
+.feat-card .card-icon { margin-bottom: 0.2rem; }
+
+/* =========================================================================
+   APPLICATIONS
+   ========================================================================= */
+.applications-section { position: relative; }
+
+.applications-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: clamp(2rem, 3.5vw, 3rem);
+  justify-content: center;
+}
+
+.application-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--secondary);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1.35rem;
+  border-radius: 999px;
+  transition: border-color 0.6s ease, box-shadow 0.6s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), color 0.6s ease;
+}
+.application-pill i { color: var(--primary); font-size: 1rem; }
+.application-pill:hover {
+  border-color: rgba(var(--primary-rgb), 0.4);
+  box-shadow: 0 14px 30px rgba(var(--primary-rgb), 0.18);
+  transform: translateY(-3px);
+}
+
+/* =========================================================================
+   PRODUCT GALLERY (masonry)
+   ========================================================================= */
+.gallery-details-section { position: relative; }
+
+.gallery-masonry {
+  columns: 3 220px;
+  column-gap: 1.15rem;
+  margin-top: clamp(2.5rem, 4vw, 3.5rem);
+}
+@media (max-width: 767.98px) { .gallery-masonry { columns: 2 160px; } }
+@media (max-width: 479.98px) { .gallery-masonry { columns: 1; } }
+
+/* .gallery-masonry__item / __overlay / __view and the whole .lightbox*
+   component moved to production-lines.css — shared with products.html's
+   Line Gallery now (same tile + fullscreen viewer, different container). */
+
+/* =========================================================================
+   RELATED PRODUCTS (transition wording only — grid itself reuses
+   .related-section / .product-card from products.css / production-lines.css)
+   ========================================================================= */
+.related-details-section { position: relative; }
+
+/* =========================================================================
+   SHOWCASE — category badge pill + 4-up feature mini-cards
+   ========================================================================= */
+.status-pill--category {
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.08);
+  border-color: rgba(var(--primary-rgb), 0.2);
+}
+
+.showcase-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.85rem;
+}
+.showcase-feature-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.4rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease, border-color 0.5s ease;
+}
+.showcase-feature-card:hover { transform: translateY(-4px); }
+.showcase-feature-card .card-icon {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+  margin: 0;
+}
+.showcase-feature-card .card-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.94rem;
+  line-height: 1.3;
+  text-align: left;
+  margin: 0;
+}
+@media (max-width: 420px) { .showcase-feature-grid { grid-template-columns: 1fr; } }
+
+/* =========================================================================
+   ABOUT THIS SPARE PART — 4 cards, 2 columns, circular icons
+   ========================================================================= */
+.about-part-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.75rem, 3vw, 2.5rem) clamp(2rem, 4vw, 4rem);
+  margin-top: clamp(2.5rem, 4vw, 3.5rem);
+}
+@media (max-width: 767.98px) { .about-part-grid { grid-template-columns: 1fr; } }
+
+.about-card {
+  display: flex;
+  gap: 1.1rem;
+  align-items: flex-start;
+}
+.about-card__icon {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--primary-rgb), 0.08);
+  color: var(--primary);
+  font-size: 1.2rem;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.6s ease, color 0.6s ease;
+}
+.about-card:hover .about-card__icon {
+  background: var(--primary);
+  color: #fff;
+  transform: scale(1.08);
+}
+.about-card__title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--secondary);
+  margin: 0 0 0.4rem;
+}
+.about-card__text {
+  color: var(--text-light);
+  font-size: 0.92rem;
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* =========================================================================
+   SPECIFICATIONS — datasheet table (replaces the earlier card grid)
+   ========================================================================= */
+.specs-table-wrap {
+  margin-top: clamp(2rem, 3.5vw, 3rem);
+  border: 1px solid var(--border);
+  max-height: 520px;
+  overflow-y: auto;
+}
+.specs-table { width: 100%; border-collapse: collapse; }
+.specs-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg);
+  text-align: left;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.specs-table tbody tr { transition: background 0.4s ease; }
+.specs-table tbody tr:nth-child(even) { background: var(--bg-light); }
+.specs-table tbody tr:hover { background: rgba(var(--primary-rgb), 0.06); }
+.specs-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
+  color: var(--secondary);
+}
+.specs-table td.specs-table__label { font-weight: 700; width: 40%; }
+.specs-table td.specs-table__value { color: var(--text-light); }
+
+.specs-table-note {
+  margin-top: 1.1rem;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* =========================================================================
+   STICKY REQUEST QUOTE CTA — page-specific gradient on the shared
+   .cta-band (production-lines.css); everything else there is reused as-is.
+   ========================================================================= */
+.cta-band--quote {
+  background: linear-gradient(160deg, var(--primary) 0%, var(--secondary) 100%);
+}
+.cta-band--quote .cta-band__actions {
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* =========================================================================
+   REQUEST QUOTE MODAL — same shell recipe as .app-modal (careers.css),
+   re-declared under its own name since careers.css isn't linked here;
+   form fields reuse .form-group-custom/.form-input-custom (style.css).
+   ========================================================================= */
+.quote-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.quote-modal.is-open { visibility: visible; opacity: 1; pointer-events: auto; }
+
+.quote-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 16, 28, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.quote-modal__panel {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  overflow-x: visible;
+  padding: clamp(1.75rem, 3.5vw, 2.25rem) clamp(1.5rem, 3.5vw, 2.25rem);
+  border-radius: 20px;
+  background: var(--bg);
+  box-shadow: 0 40px 100px rgba(3, 13, 26, 0.35);
+}
+
+.quote-modal__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(var(--primary-rgb), 0.08);
+  color: var(--text-light);
+  transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+.quote-modal__close:hover { background: rgba(var(--primary-rgb), 0.14); color: var(--primary); transform: rotate(90deg); }
+
+.quote-modal__title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--secondary);
+  margin: 0.6rem 0 0.6rem;
+}
+.quote-modal__text {
+  color: var(--text-light);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+.quote-modal__optional { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-light); }
+
+.quote-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.85rem;
+  margin-top: 0.35rem;
+}
+.quote-modal__actions .btn-primary-custom,
+.quote-modal__actions .btn-outline-custom {
+  height: 52px;
+  padding-left: 1.85rem;
+  padding-right: 1.85rem;
+  justify-content: center;
+  transition: transform 0.25s var(--ease-premium), box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease, letter-spacing 0.25s ease;
+}
+.quote-modal__actions .btn-primary-custom:hover { transform: translateY(-2px); }
+.quote-modal__actions .btn-outline-custom:hover { transform: translateY(-2px); }
+
+@media (max-width: 575.98px) {
+  .quote-modal__actions { flex-direction: column-reverse; }
+  .quote-modal__actions .btn-primary-custom,
+  .quote-modal__actions .btn-outline-custom { width: 100%; justify-content: center; }
+}
+
+/* =========================================================================
+   QUOTE MODAL — PRODUCT SUMMARY HEADER
+   Image + name + category shown at the top of the modal, above the form.
+   ========================================================================= */
+.quote-modal__product {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1.1rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.quote-modal__product-img {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  background: var(--bg-light);
+}
+.quote-modal__product-info { min-width: 0; }
+.quote-modal__product-category {
+  display: inline-block;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.09);
+  padding: 0.18rem 0.55rem;
+  border-radius: 100px;
+  margin-bottom: 0.35rem;
+}
+.quote-modal__product-name {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--secondary);
+  margin: 0 0 0.2rem;
+  overflow-wrap: anywhere;
+}
+.quote-modal__product-note { font-size: 0.82rem; color: var(--text-light); margin: 0; }
+
+@media (max-width: 480px) {
+  .quote-modal__product { align-items: flex-start; }
+  .quote-modal__product-img { width: 52px; height: 52px; }
+}
+
+/* =========================================================================
+   QUOTE MODAL — FLOATING-LABEL FIELDS WITH ICONS
+   Input padding is fixed (never changes with state) so nothing ever
+   shifts size — only the label itself transitions between its resting
+   position (vertically centered) and its floated caption position
+   (top-left, small caps). The label floats on focus, once a value is
+   present (:not(:placeholder-shown)), AND once the field has been
+   "touched" (see .is-touched, toggled by quote-modal.js on first focus)
+   — that last condition is what keeps the label pinned up even when a
+   field is blurred empty/invalid, instead of dropping back down over
+   the text the way :placeholder-shown alone would let it.
+   ========================================================================= */
+.quote-field {
+  position: relative;
+  margin-bottom: 1.1rem;
+}
+#quoteForm .form-row {
+  margin-bottom: 1.1rem;
+  column-gap: 1.1rem;
+}
+#quoteForm .form-row .quote-field { margin-bottom: 0; }
+
+.quote-field__icon {
+  position: absolute;
+  left: 1.15rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  width: 18px;
+  justify-content: center;
+  color: var(--text-light);
+  font-size: 1rem;
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.quote-field__input {
+  width: 100%;
+  height: 59px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;
+  color: var(--secondary);
+  background: var(--bg-light);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem 1rem 0.5rem 3.15rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.quote-field__input::placeholder { color: transparent; }
+
+.quote-field__label {
+  position: absolute;
+  left: 3.15rem;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  transition: transform 0.2s var(--ease-premium), top 0.2s var(--ease-premium), font-size 0.2s var(--ease-premium), color 0.2s ease;
+}
+.quote-field__req { color: var(--primary); }
+
+/* Floated state — focus, has a value, or has been touched (see above) */
+.quote-field__input:focus + .quote-field__label,
+.quote-field__input:not(:placeholder-shown) + .quote-field__label,
+.quote-field.is-touched .quote-field__label {
+  top: 0.62rem;
+  transform: translateY(0);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+.quote-field__input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--bg);
+  box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.14);
+}
+.quote-field__input:focus + .quote-field__label { color: var(--primary); }
+.quote-field__input:focus ~ .quote-field__icon { color: var(--primary); }
+
+/* Readonly product-name field — premium disabled look */
+.quote-field--filled .quote-field__input {
+  padding-right: 2.6rem;
+  background: #f1f5f9;
+  color: var(--text-light);
+  cursor: not-allowed;
+}
+.quote-field--filled .quote-field__input:focus {
+  border-color: var(--border);
+  background: #f1f5f9;
+  box-shadow: none;
+}
+.quote-field--filled .quote-field__label {
+  top: 0.62rem;
+  transform: translateY(0);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.quote-field__lock {
+  position: absolute;
+  right: 1.1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+/* Inline validation — appears only on blur / submit (quote-modal.js), never while typing */
+.quote-field .form-error-text {
+  display: none;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626;
+  line-height: 1.4;
+}
+.quote-field.has-error .quote-field__input {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.04);
+}
+.quote-field.has-error .quote-field__icon { color: #dc2626; }
+.quote-field.has-error .form-error-text { display: flex; }
+
+/* =========================================================================
+   QUOTE MODAL — SEARCHABLE COUNTRY SELECT
+   The listbox is moved to <body> by quote-modal.js the first time it
+   opens (position: fixed, top/left/width computed from the input's own
+   rect) so it is never clipped by the modal panel's overflow-y: auto
+   and is never trapped inside a lower stacking context created by the
+   entrance animation's transform on sibling .quote-field elements —
+   both of which caused it to render underneath the rows below it.
+   Visibility/opacity (not [hidden]) drive the open/close so it can
+   animate smoothly instead of snapping.
+   ========================================================================= */
+.quote-field--select .quote-field__input { padding-right: 2.5rem; cursor: pointer; }
+.quote-field__caret {
+  position: absolute;
+  right: 1.1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+  font-size: 0.8rem;
+  pointer-events: none;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+.quote-field--select.is-open .quote-field__caret { transform: translateY(-50%) rotate(180deg); color: var(--primary); }
+
+.quote-country-list {
+  position: fixed;
+  z-index: 3000;
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-lg);
+  max-height: 260px;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.2s var(--ease-premium), transform 0.2s var(--ease-premium), visibility 0.2s;
+  pointer-events: none;
+}
+.quote-country-list.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.quote-country-list li {
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.quote-country-list li mark {
+  background: none;
+  color: var(--primary);
+  font-weight: 700;
+  padding: 0;
+}
+.quote-country-list li:hover,
+.quote-country-list li.is-active { background: rgba(var(--primary-rgb), 0.09); color: var(--primary); }
+.quote-country-list__empty { color: var(--text-light); cursor: default; }
+.quote-country-list__empty:hover { background: none; color: var(--text-light); }
+
+/* =========================================================================
+   QUOTE MODAL — SUBMIT BUTTON DISABLED STATE
+   Stays disabled until every required field validates.
+   ========================================================================= */
+.quote-modal__actions .btn-primary-custom:disabled,
+.quote-modal__actions .btn-primary-custom[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none !important;
+}
+
+/* =========================================================================
+   QUOTE REQUEST — SUCCESS TOAST
+   Fixed top-right, slides in on send, auto-hides after 3s (quote-modal.js).
+   ========================================================================= */
+.quote-toast {
+  position: fixed;
+  top: 1.75rem;
+  right: 1.75rem;
+  z-index: 1400;
+  display: none;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.9rem 1.25rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--secondary);
+}
+.quote-toast.is-visible { display: flex; }
+.quote-toast__icon { color: var(--primary); font-size: 1.1rem; display: inline-flex; }
+
+@media (max-width: 480px) {
+  .quote-toast { left: 1rem; right: 1rem; top: 1rem; }
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+@media (max-width: 991.98px) {
+  .showcase-grid { grid-template-columns: 1fr; }
+  .showcase-media { position: static; }
+}
+
+@media (max-width: 575.98px) {
+  .showcase-nav { width: 36px; height: 36px; }
+  .showcase-thumb { width: 68px; height: 68px; }
+  .lightbox__nav { width: 42px; height: 42px; }
+  .lightbox__close { width: 40px; height: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .showcase-main__skeleton { animation: none; }
+}

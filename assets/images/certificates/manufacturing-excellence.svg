@@ -1,0 +1,27 @@
+<svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="mfgTitle">
+  <title id="mfgTitle">Manufacturing Excellence certificate</title>
+  <defs>
+    <linearGradient id="gMfgBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#20242c"/>
+      <stop offset="100%" stop-color="#11141a"/>
+    </linearGradient>
+  </defs>
+  <rect width="520" height="340" fill="url(#gMfgBg)"/>
+  <path d="M0 200 C100 160 180 240 280 190 C360 150 440 210 520 180 L520 0 L0 0 Z" fill="#155BA9" opacity="0.18"/>
+  <path d="M0 260 C110 230 200 290 300 250 C380 218 450 260 520 240 L520 340 L0 340 Z" fill="#95D600" opacity="0.16"/>
+  <g stroke="#3f6f9e" stroke-width="1" opacity="0.4">
+    <circle cx="440" cy="90" r="42" fill="none"/>
+    <circle cx="440" cy="90" r="30" fill="none"/>
+  </g>
+  <g fill="none" stroke="#95D600" stroke-width="3" stroke-linecap="round">
+    <circle cx="70" cy="90" r="26"/>
+    <path d="M70 64 L70 52 M70 128 L70 116 M44 90 L32 90 M108 90 L96 90 M51 71 L44 64 M96 116 L89 109 M51 109 L44 116 M96 64 L89 71"/>
+  </g>
+  <text x="140" y="82" font-family="Georgia, serif" font-size="13" letter-spacing="3" fill="#a9c6df">CERTIFIED</text>
+  <text x="140" y="130" font-family="Georgia, serif" font-weight="700" font-size="30" fill="#ffffff">Manufacturing</text>
+  <text x="140" y="164" font-family="Georgia, serif" font-weight="700" font-size="30" fill="#ffffff">Excellence</text>
+  <line x1="140" y1="188" x2="340" y2="188" stroke="#95D600" stroke-width="2"/>
+  <text x="140" y="216" font-family="Georgia, serif" font-size="13" fill="#c2d7e8">Precision Engineering Standard</text>
+  <text x="140" y="292" font-family="Georgia, serif" font-size="12" fill="#a9c6df">European Industry Alliance</text>
+  <text x="140" y="312" font-family="Georgia, serif" font-size="11" fill="#7d94a8">Issued 2022</text>
+</svg>

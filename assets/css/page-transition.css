@@ -1,0 +1,32 @@
+/* =========================================================================
+   PITEX — page-transition.css
+   One shared overlay, lazily created by page-transition.js, reused by
+   every page that navigates via PitexTransition.navigate() (category
+   cards on production-lines.html, product cards on products.html).
+   Never hand-author this markup per page — it's created once in JS.
+   ========================================================================= */
+
+.page-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page-transition-overlay.is-active {
+  pointer-events: all;
+}
+
+.page-transition-overlay__gear {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 2.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-overlay { display: none; }
+}

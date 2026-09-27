@@ -1,0 +1,932 @@
+/* =========================================================================
+   PITEX — Production Lines page + homepage preview
+   Adds only what utilities.css / style.css don't already provide. Reuses:
+   --primary/--secondary/--text tokens, .section-badge/.section-title,
+   .btn-primary-custom/.btn-outline-custom/.btn-light-custom, .card-sweep,
+   .particle-field/.ambient-blob, .eyebrow, .link-arrow, .glass-card,
+   .gsap-* animation hooks, and .js-anim pre-states from animations.css.
+   NOTE ON MOTION OWNERSHIP: same split as the rest of the site — GSAP
+   (production-lines.js) owns every transform (lift, image zoom, tilt);
+   CSS here only owns static layout and non-transform hover affordances
+   (box-shadow, border-color, background, opacity).
+   ========================================================================= */
+
+/* ---------- PAGE HERO ---------- */
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: min(88vh, 760px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  isolation: isolate;
+}
+
+.page-hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.page-hero__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.page-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(var(--primary-rgb), 0.92) 0%, rgba(3, 13, 26, 0.88) 100%);
+}
+
+.page-hero__inner {
+  position: relative;
+  z-index: 1;
+  padding-block: clamp(3rem, 6vw, 5rem);
+  max-width: 820px;
+}
+
+.breadcrumb-custom {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 1.5rem;
+}
+.breadcrumb-custom a {
+  color: rgba(255, 255, 255, 0.9);
+  transition: color 0.5s ease;
+}
+.breadcrumb-custom a:hover { color: #fff; }
+.breadcrumb-custom i { font-size: 0.7rem; opacity: 0.7; }
+.breadcrumb-custom span[aria-current] { color: #fff; }
+
+.page-hero__title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.5rem, 1.7rem + 3.6vw, 4.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin: 1.1rem 0 0;
+}
+.page-hero__title .text-accent { color: var(--primary-light); }
+
+.page-hero__desc {
+  font-size: var(--fs-subtitle);
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.7;
+  margin-top: 1.25rem;
+  max-width: 62ch;
+}
+
+.scroll-indicator {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1.5rem, 4vh, 2.75rem);
+  transform: translateX(-50%);
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  z-index: 1;
+}
+.scroll-indicator__mouse {
+  display: block;
+  width: 26px;
+  height: 42px;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  position: relative;
+}
+.scroll-indicator__wheel {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  width: 4px;
+  height: 8px;
+  border-radius: 999px;
+  background: #fff;
+  transform: translateX(-50%);
+  animation: scroll-wheel 1.8s ease-in-out infinite;
+}
+@keyframes scroll-wheel {
+  0% { opacity: 1; top: 7px; }
+  60% { opacity: 0.2; top: 20px; }
+  61% { opacity: 0; top: 7px; }
+  100% { opacity: 1; top: 7px; }
+}
+
+/* ---------- FLOATING DECORATIVE SHAPES (used by any .page-hero) ----------
+   Shared here (moved from product-details.css) since both product-details.html
+   and the products.html line hero use them. */
+.floating-shape {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+  z-index: 0;
+}
+.floating-shape--sq {
+  border-radius: 8px;
+  transform: rotate(20deg);
+}
+
+/* =========================================================================
+   SHARED MEDIA GALLERY — large image + thumbnails + prev/next + counter.
+   Used by product-details.html (single machine) and products.html
+   (category showcase) via the same .showcase-media/.showcase-main/
+   .showcase-thumbs markup, so the gallery behaviour and look never
+   diverges between the two pages.
+   ========================================================================= */
+.showcase-media {
+  position: sticky;
+  top: clamp(88px, 10vh, 120px);
+}
+
+.showcase-main {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  aspect-ratio: 4 / 3.1;
+  box-shadow: var(--shadow-lg);
+  isolation: isolate;
+  background: linear-gradient(160deg, var(--bg-light) 0%, var(--border) 100%);
+}
+.showcase-main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb), 0.18);
+  pointer-events: none;
+  z-index: 3;
+}
+.showcase-main__track {
+  position: absolute;
+  inset: 0;
+}
+.showcase-main__track img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform, opacity, filter;
+}
+
+/* Soft spotlight that follows the mouse over the main image */
+.showcase-spotlight {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle 260px at var(--spot-x, 50%) var(--spot-y, 50%), rgba(255, 255, 255, 0.28), transparent 70%);
+  transition: opacity 0.5s ease;
+  mix-blend-mode: overlay;
+}
+.showcase-main:hover .showcase-spotlight { opacity: 1; }
+
+/* Skeleton shimmer shown until the main image reports loaded */
+.showcase-main__skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(100deg, var(--bg-light) 30%, #eef3f8 50%, var(--bg-light) 70%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+.showcase-main.is-loaded .showcase-main__skeleton { display: none; }
+@keyframes skeleton-shimmer {
+  0% { background-position: 140% 0; }
+  100% { background-position: -40% 0; }
+}
+
+.showcase-counter {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 2;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: rgba(3, 13, 26, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+}
+
+.showcase-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.5s ease, box-shadow 0.5s ease, opacity 0.4s ease;
+}
+.showcase-nav:hover { background: #fff; box-shadow: 0 10px 24px rgba(3, 13, 26, 0.28); }
+.showcase-nav--prev { left: 1rem; }
+.showcase-nav--next { right: 1rem; }
+.showcase-nav:disabled,
+.showcase-nav[hidden] { display: none; }
+
+/* ---------- Thumbnails ---------- */
+.showcase-thumbs {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+  scrollbar-width: thin;
+}
+
+.showcase-thumb {
+  flex: 0 0 auto;
+  width: 84px;
+  height: 84px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  background: var(--bg-light);
+  transition: border-color 0.5s ease, box-shadow 0.5s ease;
+}
+.showcase-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), filter 0.6s ease;
+}
+.showcase-thumb:hover img { transform: scale(1.08); }
+.showcase-thumb:hover { box-shadow: 0 10px 22px rgba(3, 13, 26, 0.18); }
+.showcase-thumb.is-active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18);
+}
+.showcase-thumb.is-active img { filter: brightness(1.02); }
+
+/* ---------- PRODUCT CARD (shared between homepage preview + catalog) ---------- */
+.product-card {
+  display: block;
+  height: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  isolation: isolate;
+  will-change: transform;
+  transition: box-shadow 1.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.product-card:hover {
+  border-color: rgba(var(--primary-rgb), 0.35);
+  box-shadow: 0 30px 70px rgba(var(--primary-rgb), 0.22);
+}
+
+.product-card__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  /* Visible fallback so a missing/404 image never reads as a blank card */
+  background: linear-gradient(160deg, var(--bg-light) 0%, var(--border) 100%);
+}
+.product-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform, filter;
+  transform-origin: center;
+}
+
+.product-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.12;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 55%, rgba(var(--primary-rgb), 0.32) 100%);
+  transition: opacity 0.9s ease;
+}
+.product-card:hover .product-overlay { opacity: 0.5; }
+
+.product-card:hover .card-sweep {
+  opacity: 1;
+  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+  transform: translateX(280%) rotate(10deg);
+}
+
+.product-badge {
+  position: absolute;
+  top: 0.9rem;
+  z-index: 2;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+}
+.product-badge--featured {
+  left: 0.9rem;
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(var(--primary-rgb), 0.4);
+}
+
+.product-favorite {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  color: var(--secondary);
+  cursor: pointer;
+  transition: background 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
+}
+.product-favorite:hover { box-shadow: 0 10px 22px rgba(3, 13, 26, 0.28); }
+.product-favorite.is-active { color: var(--primary); }
+.product-favorite.is-active i::before { content: '\f415'; } /* bi-heart-fill */
+
+.product-card__body {
+  padding: 1.6rem 1.6rem 1.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.product-category {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+}
+
+.product-title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  color: var(--secondary);
+  margin: 0 0 0.6rem;
+  transition: color 1s ease;
+}
+.product-card:hover .product-title { color: var(--primary); }
+
+.product-text {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  margin: 0;
+  min-height: 3.3em;
+}
+
+.product-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.35rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--border);
+}
+
+.product-icons {
+  display: flex;
+  gap: 0.4rem;
+}
+.product-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--primary-rgb), 0.07);
+  color: var(--primary);
+  font-size: 0.8rem;
+}
+
+.product-link { margin-top: 0; flex-shrink: 0; }
+
+/* ---------- HOME PAGE PREVIEW — SIMPLIFIED CARD ----------
+   Scoped to #homeProductsGrid (only present on index.html), so
+   products.html and production-lines.html keep the full card (icons,
+   favorite button) untouched. Image/title/description/hover animation
+   are all inherited as-is from .product-card above — this just hides
+   the icon row + favorite button and left-aligns the remaining single
+   "Learn More" link. */
+#homeProductsGrid .product-favorite,
+#homeProductsGrid .product-icons {
+  display: none;
+}
+#homeProductsGrid .product-card__footer {
+  justify-content: flex-start;
+}
+
+/* ---------- FEATURE BADGES ----------
+   Used on products.html in place of long specification paragraphs
+   (Automation / Capacity / Material / Energy Efficient / Export Ready).
+   Rendered by the shared renderProductCard() in products-data.js when
+   `showBadges: true` is passed — never authored by hand per page. */
+.product-feature-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.feature-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.07);
+  border: 1px solid rgba(var(--primary-rgb), 0.16);
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+}
+.feature-badge i { font-size: 0.78rem; }
+
+/* Glass variant for use on dark/photographic hero backgrounds (e.g. the
+   products.html production-line hero) — same shape/weight as .feature-badge,
+   inverted for contrast instead of the light-surface colors above. */
+.feature-badge--light {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ---------- HOMEPAGE PREVIEW SECTION ---------- */
+.production-preview-section { position: relative; }
+.production-preview-section .section-subtitle { margin-top: 1rem; margin-bottom:2.5rem; }
+.production-preview-cta {
+  margin-top: clamp(2.5rem, 4vw, 3.5rem);
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.catalog-section { position: relative; }
+
+/* ---------- INTRO ---------- */
+.production-intro { position: relative; }
+.production-intro__lead {
+  max-width: 68ch;
+  margin: 1.35rem auto 0;
+  font-size: var(--fs-subtitle);
+  color: var(--text-light);
+  line-height: 1.75;
+}
+
+/* ---------- CATEGORIES GRID ---------- */
+.categories-section { position: relative; }
+
+.categories-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(1.5rem, 3vw, 1.85rem);
+  margin-top: clamp(2.5rem, 4vw, 4rem);
+  position: relative;
+  z-index: 1;
+}
+
+.category-card {
+  position: relative;
+  display: block;
+  flex: 1 1 300px;
+  max-width: 370px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  will-change: transform;
+}
+
+/* Border glow, brightened on hover — same recipe as .solution-card::after */
+.category-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  pointer-events: none;
+  z-index: 3;
+  transition: box-shadow 0.9s ease;
+}
+.category-card:hover::after {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 0 44px rgba(var(--primary-rgb), 0.35);
+}
+
+.category-card__media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.category-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform, filter;
+  transform-origin: center;
+}
+
+.category-card__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(0deg, rgba(3, 13, 26, 0.94) 0%, rgba(3, 13, 26, 0.45) 55%, rgba(3, 13, 26, 0.08) 100%);
+  transition: background 0.9s ease;
+}
+.category-card:hover .category-card__overlay {
+  background: linear-gradient(0deg, rgba(var(--primary-rgb), 0.96) 0%, rgba(3, 13, 26, 0.55) 60%, rgba(3, 13, 26, 0.12) 100%);
+}
+
+.category-card:hover .card-sweep {
+  opacity: 1;
+  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+  transform: translateX(280%) rotate(10deg);
+}
+
+.category-card__icon {
+  position: absolute;
+  top: 1.35rem;
+  left: 1.35rem;
+  z-index: 2;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  font-size: 1.15rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  will-change: transform;
+}
+
+.category-card__count {
+  position: absolute;
+  top: 1.35rem;
+  right: 1.35rem;
+  z-index: 2;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+}
+
+.category-card__body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 1.85rem 1.75rem 2rem;
+}
+
+.category-card__title {
+  color: #fff;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  margin: 0 0 0.6rem;
+  will-change: transform;
+}
+
+.category-card__desc {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.category-card__link { margin-top: 1.1rem; }
+
+/* Reuse the shared .link-arrow--light hover recipe from utilities.css
+   (already wired for .solution-card) for the new .category-card. */
+.category-card:hover .link-arrow--light { opacity: 1; }
+.category-card:hover .link-arrow--light::after { width: 100%; }
+
+@media (max-width: 575.98px) {
+  .category-card { flex-basis: 100%; max-width: 420px; aspect-ratio: 4 / 5; }
+}
+
+/* ---------- STATS BAND ---------- */
+.stats-section { position: relative; }
+
+.stats-band {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  max-width: 760px;
+  margin-inline: auto;
+  padding: clamp(1.5rem, 3vw, 2.25rem) clamp(2rem, 5vw, 3.5rem);
+  border-radius: 999px;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-block {
+  text-align: center;
+  position: relative;
+  padding-inline: clamp(0.5rem, 2vw, 1.5rem);
+}
+.stat-block:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  inset-inline-end: calc(-1 * clamp(0.75rem, 2vw, 1.5rem));
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+  background: var(--border);
+}
+
+.stat-block__value {
+  display: block;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2rem, 1.5rem + 1.8vw, 2.75rem);
+  line-height: 1;
+  color: var(--primary);
+}
+.stat-block__value.is-counted { animation: stat-glow 0.9s ease; }
+
+.stat-block__label {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+
+/* ---------- CTA BAND ---------- */
+.cta-band {
+  position: relative;
+  overflow: hidden;
+  /* background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%); */
+  text-align: center;
+}
+.cta-band .ambient-blob { opacity: 0.22; }
+
+.cta-band__inner {
+  position: relative;
+  z-index: 1;
+  /* max-width: 640px; */
+  margin-inline: auto;
+}
+.cta-band__inner .section-header,
+.cta-band__inner .section-badge,
+.cta-band__inner .section-title,
+.cta-band__inner .section-subtitle { margin-inline: auto; }
+
+.cta-band__actions {
+  margin-top: 2.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* =========================================================================
+   SHARED GALLERY ITEM — the individual tile (image, hover zoom, view-icon
+   overlay), moved here from product-details.css since it's now the tile
+   for BOTH product-details.html's masonry gallery (.gallery-masonry
+   container, columns layout) and products.html's equal-size Line Gallery
+   (.gallery-grid container, defined in products.css). Only the container
+   changes per page — the tile markup/classes (.gallery-masonry__item etc.)
+   stay the same everywhere so no page needs its own copy.
+   ========================================================================= */
+.gallery-masonry__item {
+  position: relative;
+  break-inside: avoid;
+  margin-bottom: 1.15rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  isolation: isolate;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.gallery-masonry__item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  pointer-events: none;
+  z-index: 3;
+  transition: box-shadow 0.8s ease;
+}
+.gallery-masonry__item:hover::after {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 0 30px rgba(var(--primary-rgb), 0.3);
+}
+.gallery-masonry__item img {
+  width: 100%;
+  display: block;
+  will-change: transform, filter;
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1), filter 0.8s ease;
+}
+.gallery-masonry__item:hover img {
+  transform: scale(1.08);
+  filter: brightness(0.75);
+}
+.gallery-masonry__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  background: linear-gradient(0deg, rgba(3, 13, 26, 0.55) 0%, transparent 60%);
+  transition: opacity 0.6s ease;
+}
+.gallery-masonry__item:hover .gallery-masonry__overlay { opacity: 1; }
+.gallery-masonry__view {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transform: scale(0.8);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.gallery-masonry__item:hover .gallery-masonry__view { transform: scale(1); }
+
+/* Equal-size grid tile variant, for containers (like .gallery-grid on
+   products.html) that use a fixed aspect-ratio instead of the masonry's
+   natural image height — image needs to fill the tile via object-fit. */
+.gallery-grid .gallery-masonry__item { margin-bottom: 0; }
+.gallery-grid .gallery-masonry__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* =========================================================================
+   LIGHTBOX — fullscreen image viewer. Shared by product-details.html
+   (single machine showcase + gallery) and products.html (Line Gallery).
+   ========================================================================= */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.lightbox.is-open { display: flex; }
+
+.lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 13, 26, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.lightbox__stage {
+  position: relative;
+  z-index: 1;
+  width: min(88vw, 1100px);
+  max-height: 84vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lightbox__stage img {
+  max-width: 100%;
+  max-height: 84vh;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+  object-fit: contain;
+  will-change: transform, opacity;
+}
+
+.lightbox__close,
+.lightbox__nav {
+  position: absolute;
+  z-index: 2;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  transition: background 0.5s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lightbox__close:hover,
+.lightbox__nav:hover { background: rgba(255, 255, 255, 0.22); }
+
+.lightbox__close {
+  top: clamp(1rem, 3vh, 2rem);
+  right: clamp(1rem, 3vw, 2.5rem);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+}
+
+.lightbox__nav {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+}
+.lightbox__nav:hover { transform: translateY(-50%) scale(1.08); }
+.lightbox__nav--prev { left: clamp(0.75rem, 3vw, 2.5rem); }
+.lightbox__nav--next { right: clamp(0.75rem, 3vw, 2.5rem); }
+
+.lightbox__counter {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1rem, 3vh, 2rem);
+  transform: translateX(-50%);
+  z-index: 2;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 767.98px) {
+  .product-card__footer { flex-direction: column; align-items: flex-start; gap: 0.9rem; }
+  .stats-band { border-radius: var(--radius-xl); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-indicator__wheel { animation: none; }
+}

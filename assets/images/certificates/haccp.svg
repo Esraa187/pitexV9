@@ -1,0 +1,25 @@
+<svg viewBox="0 0 520 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="haccpTitle">
+  <title id="haccpTitle">HACCP Food Safety certificate</title>
+  <defs>
+    <radialGradient id="gHaccpBg" cx="30%" cy="30%" r="90%">
+      <stop offset="0%" stop-color="#12457f"/>
+      <stop offset="100%" stop-color="#0A2F5C"/>
+    </radialGradient>
+    <linearGradient id="gHaccpSeal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#dfeaf5"/>
+    </linearGradient>
+  </defs>
+  <rect width="520" height="340" fill="url(#gHaccpBg)"/>
+  <g opacity="0.12" stroke="#ffffff" fill="none">
+    <circle cx="460" cy="40" r="120"/>
+    <circle cx="30" cy="320" r="100"/>
+  </g>
+  <text x="260" y="52" text-anchor="middle" font-family="Georgia, serif" font-size="13" letter-spacing="4" fill="#9fc3e6">FOOD SAFETY MANAGEMENT</text>
+  <circle cx="260" cy="150" r="66" fill="url(#gHaccpSeal)"/>
+  <circle cx="260" cy="150" r="66" fill="none" stroke="#95D600" stroke-width="3"/>
+  <path d="M235 152 L253 170 L288 130" fill="none" stroke="#155BA9" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="260" y="253" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="30" fill="#ffffff">HACCP</text>
+  <text x="260" y="278" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#c7dcef">Hazard Analysis Critical Control Points</text>
+  <text x="260" y="312" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#9fc3e6">Bureau Veritas &#183; Issued 2021</text>
+</svg>

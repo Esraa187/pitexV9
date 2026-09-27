@@ -1,0 +1,104 @@
+/* =========================================================================
+   PITEX — success-partners.css
+   "Success Partners" page. Header, page banner and footer are the shared
+   components (unchanged) — this file only styles the one Partners grid
+   section that's local to this page.
+
+   Reuses as-is, never redeclared here: --primary/--primary-rgb/--secondary/
+   --text/--text-light/--border/--bg tokens, --radius-*/--shadow*/
+   --ease-premium, .section-padding/.bg-surface, .section-header/
+   .section-badge/.section-title/.section-subtitle, .card/.card-title/
+   .card-text, .gsap-fade-up/.gsap-stagger-item pre-states (animations.css).
+
+   Card content model: each .partner-card renders ONLY the real company
+   logo (<img class="partner-card__logo">) — no name, no description, no
+   icon. See assets/js/success-partners.js for the render logic and
+   assets/js/partners-data.js for how to add a new logo.
+   ========================================================================= */
+
+.partners-section { position: relative; overflow: hidden; isolation: isolate; }
+.partners-section > .container-custom { position: relative; z-index: 1; }
+
+/* ---------- Grid: 4 / 3 / 2 columns, equal card size ---------- */
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2vw, 1.75rem);
+  margin-top: clamp(2.5rem, 4vw, 4rem);
+}
+
+/* ---------- Card — extends the shared .card primitive ----------
+   .card already supplies white background, border and radius
+   (utilities.css); this only adds the fixed height, generous whitespace
+   and the subtle lift-on-hover choreography, which are new to this page. */
+.partner-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  padding: 1.5rem;
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.08);
+  transition:
+    transform 0.3s var(--ease-premium),
+    box-shadow 0.3s var(--ease-premium),
+    border-color 0.3s var(--ease-premium);
+}
+
+.partner-card:hover,
+.partner-card:focus-within {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.09);
+  border-color: rgba(var(--primary-rgb), 0.22);
+}
+
+/* ---------- Logo — the ONLY visible content in the card ---------- */
+.partner-card__logo {
+  width: 100%;
+  height: 100%;
+  max-width: 220px;
+  max-height: 110px;
+  object-fit: contain;
+  transition: transform 0.3s var(--ease-premium);
+}
+
+.partner-card:hover .partner-card__logo,
+.partner-card:focus-within .partner-card__logo {
+  transform: scale(1.03);
+}
+
+/* ---------- Empty state — shown only while a real logo file hasn't
+   been added yet at the path listed in partners-data.js. This is a
+   neutral system/admin state, never a stand-in "fake logo". ---------- */
+.partner-card__empty-note { display: none; }
+.partner-card--empty {
+  border-style: dashed;
+  border-color: rgba(15, 23, 42, 0.16);
+}
+.partner-card--empty .partner-card__empty-note {
+  display: block;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-light);
+  text-align: center;
+}
+.partner-card--empty:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---------- Responsive: 4 / 3 / 2, no horizontal scroll ---------- */
+@media (max-width: 991.98px) {
+  .partners-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 767.98px) {
+  .partners-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .partner-card { height: 130px; padding: 0.9rem; }
+  .partner-card__logo { max-height: 96px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partner-card,
+  .partner-card__logo { transition: none; }
+}

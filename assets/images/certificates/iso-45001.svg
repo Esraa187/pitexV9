@@ -1,0 +1,22 @@
+<svg viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="iso45001Title">
+  <title id="iso45001Title">ISO 45001:2018 Occupational Health and Safety certificate</title>
+  <defs>
+    <linearGradient id="g45001" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#eef4fa"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="500" fill="url(#g45001)"/>
+  <rect x="0" y="0" width="400" height="10" fill="#155BA9"/>
+  <rect x="0" y="490" width="400" height="10" fill="#155BA9"/>
+  <text x="200" y="66" text-anchor="middle" font-family="Georgia, serif" font-size="12" letter-spacing="4" fill="#155BA9">HEALTH &amp; SAFETY</text>
+  <path d="M200 96 L246 116 L246 156 C246 190 226 214 200 224 C174 214 154 190 154 156 L154 116 Z" fill="#eaf1fa" stroke="#155BA9" stroke-width="2"/>
+  <path d="M182 158 L196 172 L220 142" fill="none" stroke="#155BA9" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="200" y="270" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="30" fill="#0A2F5C">ISO 45001</text>
+  <text x="200" y="296" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#4a6d8a">: 2018 Certification</text>
+  <line x1="130" y1="316" x2="270" y2="316" stroke="#155BA9" stroke-width="1"/>
+  <text x="200" y="344" text-anchor="middle" font-family="Georgia, serif" font-size="13" fill="#33475a">Occupational Health &amp; Safety</text>
+  <text x="200" y="364" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#5a7590">Management System</text>
+  <text x="200" y="432" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#4a6d8a">DNV</text>
+  <text x="200" y="452" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#7d94a8">Issued 2023</text>
+</svg>

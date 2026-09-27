@@ -1,0 +1,1023 @@
+/* =========================================================================
+   PITEX — Header / Primary Navigation
+   Reuses design tokens from utilities.css (--primary, --shadow*, --ease-
+   premium, --radius-*, --container-max, .btn-primary-custom, .glass-card,
+   .container-custom) — nothing here redefines those primitives.
+
+   MOTION OWNERSHIP (same rule as style.css): continuous/physics motion
+   (logo float, magnetic button, ripple, button lift) stays owned by
+   main.js's existing initMagnetic/initButtonPremium — the header's CTA
+   just uses .btn-primary-custom so it's picked up automatically, no
+   duplicate hover JS lives in header.js. header.js only owns what's new:
+   sticky/compact state, reveal-on-load, mega menu, language switch,
+   mobile offcanvas, active-link tracking.
+
+   STICKY: the header is `position: fixed` from first paint and stays
+   visible at all times, scrolling up or down — header.js only toggles
+   `.is-scrolled` past a small threshold (see below), it never hides or
+   translates the header off-screen.
+
+   PERFORMANCE: `.is-scrolled` is a class toggle that fires once per
+   threshold *crossing* (rAF-throttled in header.js), not per scroll
+   frame, so the padding/background/shadow transitions below are not a
+   continuous layout cost. Everything else (hover, mega menu, offcanvas)
+   animates transform/opacity only.
+   ========================================================================= */
+
+:root {
+  --header-h: 89px;
+  /* pre-JS fallback only */
+}
+
+/* Fixed header needs page content pushed down by its own height so
+   nothing sits underneath it. header.js measures the header's *actual*
+   rendered height (ResizeObserver) and writes it into --header-h on
+   load and on every resize/compact-state change, so this stays exact
+   even as scrolling changes the header's padding — the value above is
+   only what renders for the instant before JS runs. */
+body {
+  padding-top: var(--header-h);
+  transition: padding-top 0.4s var(--ease-premium);
+}
+
+/* ---------- Header shell ---------- */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color 0.35s var(--ease-premium),
+    border-color 0.35s var(--ease-premium),
+    box-shadow 0.35s var(--ease-premium);
+}
+
+/* Scrolled state: same light/glass language as the resting state, just
+   more opaque + a touch more blur/shadow for legibility over page
+   content — no color flip, so nav/logo/CTA all read correctly in both
+   states without needing separate "on-dark" variants. */
+.site-header.is-scrolled {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-bottom-color: var(--border);
+  box-shadow: var(--shadow);
+}
+
+.site-header__inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: 1fr;
+  align-items: center;
+  column-gap: clamp(1rem, 2vw, 2.5rem);
+  padding-block: 0.65rem;
+  transition: padding-block 0.35s var(--ease-premium);
+}
+
+.site-header.is-scrolled .site-header__inner {
+  padding-block: 0.6rem;
+}
+
+/* ---------- Logo (left) ---------- */
+.site-header__logo {
+  grid-column: 1;
+  grid-row: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+
+}
+
+.site-header__logo img {
+  height: 68px;
+  width: auto;
+  transition: height 0.35s var(--ease-premium);
+}
+
+.site-header.is-scrolled .site-header__logo img {
+  /* Header stays light/glass in both states (see .is-scrolled above),
+     so the logo's own color never needs to flip — only its size steps
+     down slightly to match the more compact scrolled header. */
+  height: 62px;
+}
+
+/* ---------- Primary nav (center) ---------- */
+.site-header__nav--primary {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+}
+
+.site-header__list {
+  display: flex;
+  align-items: center;
+  gap: clamp(2rem, 2.2vw, 2.5rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-header__item {
+  position: relative;
+}
+
+/* Items whose trigger is split into a real link + a separate toggle
+   button (Production Lines) lay the two out inline with the same
+   spacing the old single-button trigger used — visually identical,
+   just two focusable elements instead of one. Items with a single
+   button trigger (Company) are unaffected: one flex child, no change. */
+.site-header__item--has-mega {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+/* Icon-only chevron button that opens/closes the dropdown when the
+   parent label is its own link. Reuses .site-header__chevron inside
+   for the icon itself, so rotation-on-open still applies unchanged. */
+.site-header__mega-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0.4rem 0.15rem;
+  margin: 0;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.3s ease;
+}
+
+.site-header__mega-toggle:hover,
+.site-header__mega-toggle:focus-visible {
+  color: var(--primary);
+}
+
+.site-header__mega-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.site-header__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 0.4rem 0;
+  cursor: pointer;
+  transition: color 0.4s var(--ease-premium), transform 0.4s var(--ease-premium), letter-spacing 0.4s ease;
+}
+
+.site-header__underline {
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 2px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--ease-premium);
+}
+
+.site-header__link:hover,
+.site-header__link:focus-visible {
+  color: var(--primary);
+  transform: translateY(-2px);
+  letter-spacing: 0.01em;
+}
+
+.site-header__link:hover .site-header__underline,
+.site-header__link:focus-visible .site-header__underline {
+  transform: scaleX(1);
+}
+
+.site-header__link.is-active {
+  color: var(--primary);
+}
+
+.site-header__link.is-active .site-header__underline {
+  transform: scaleX(1);
+}
+
+.site-header__chevron {
+  font-size: 0.7rem;
+  transition: transform 0.4s var(--ease-premium);
+}
+
+.site-header__item--has-mega.is-open .site-header__chevron {
+  transform: rotate(180deg);
+}
+
+/* ---------- Mega menu ---------- */
+.mega-menu {
+  position: absolute;
+  top: calc(100% + 1.15rem);
+  left: 50%;
+  transform: translate(-50%, 12px);
+  width: min(640px, 86vw);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.902);
+  border: 1px solid rgba(var(--primary-rgb), 0.12);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.4s var(--ease-premium), transform 0.4s var(--ease-premium), visibility 0.4s;
+  z-index: 1001;
+}
+
+/* Backdrop-blur is inherited from .glass-card on light sections; on this
+   translucent-white surface we boost it slightly for legibility. */
+.mega-menu.glass-card {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.site-header__item--has-mega.is-open .mega-menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.mega-menu__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.mega-menu__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.1rem 0.9rem;
+  border-radius: var(--radius-md);
+  transition: background 0.35s var(--ease-premium), transform 0.35s var(--ease-premium);
+}
+
+.mega-menu__item:hover,
+.mega-menu__item:focus-visible {
+  background: rgba(var(--primary-rgb), 0.06);
+  transform: translateY(-3px);
+}
+
+.mega-menu__icon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(var(--primary-rgb), 0.09);
+  color: var(--primary);
+  font-size: 1.05rem;
+  transition: transform 0.4s var(--ease-premium);
+}
+
+.mega-menu__item:hover .mega-menu__icon {
+  transform: scale(1.08) rotate(-4deg);
+}
+
+.mega-menu__title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--secondary);
+}
+
+.mega-menu__text {
+  font-size: 0.825rem;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+
+.mega-menu__footer {
+  margin-top: 1.1rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- Dropdown variant (Company) ----------
+   A focused single-column list rather than the 3-col Solutions grid —
+   reuses every mega-menu primitive (glass, shadow, radius, item/icon/
+   title/text, open/close state) and only overrides geometry + timing,
+   so nothing above is duplicated. Radius pinned to --radius-md (14px)
+   per spec; timing tightened to the requested ~220ms ease-out with a
+   touch of scale, instead of the wider mega-menu's 400ms premium ease. */
+.mega-menu--dropdown {
+  left: 0;
+  width: min(240px, 86vw);
+  padding: 0.65rem;
+  border-radius: var(--radius-md);
+  background: #fff;
+  border: 1px solid var(--border);
+  transform: translateY(8px) scale(0.98);
+  transition: opacity 0.22s ease-out, transform 0.22s ease-out, visibility 0.22s;
+}
+
+/* Solid white surface — this variant intentionally opts out of the
+   translucent/blurred glass look used by the wider Solutions mega-menu,
+   for a crisper, more modern dropdown read. */
+.mega-menu--dropdown.glass-card {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.site-header__item--has-mega.is-open .mega-menu--dropdown {
+  transform: translateY(0) scale(1);
+}
+
+/* Width modifier only — for dropdowns whose item labels run longer than
+   the default 240px (e.g. Production Lines). Everything else (padding,
+   radius, shadow, hover state, transition timing) stays identical to
+   the base dropdown recipe above. */
+.mega-menu--dropdown.mega-menu--wide {
+  width: min(340px, 90vw);
+}
+
+.mega-menu--dropdown .mega-menu__grid {
+  grid-template-columns: 1fr;
+  gap: 0.2rem;
+}
+
+.mega-menu--dropdown .mega-menu__item {
+  position: relative;
+  flex-direction: row;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  transition: background 0.25s ease, transform 0.25s var(--ease-premium), padding-left 0.25s var(--ease-premium);
+}
+
+.mega-menu--dropdown .mega-menu__item:hover,
+.mega-menu--dropdown .mega-menu__item:focus-visible {
+  transform: none;
+  padding-left: 1.25rem;
+  background: rgba(var(--primary-rgb), 0.06);
+}
+
+.mega-menu--dropdown .mega-menu__item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 100%;
+  background: var(--primary);
+  border-radius: 10px 0 0 10px;
+  transition: width 0.25s ease;
+}
+
+
+.mega-menu--dropdown .mega-menu__item:hover::before,
+.mega-menu--dropdown .mega-menu__item:focus-visible::before {
+  width: 6px;
+}
+
+.mega-menu--dropdown .mega-menu__item:hover .mega-menu__title,
+.mega-menu--dropdown .mega-menu__item:focus-visible .mega-menu__title {
+  color: var(--primary);
+}
+
+.mega-menu--dropdown .mega-menu__item.is-active {
+  background: rgba(var(--primary-rgb), 0.07);
+}
+
+.mega-menu--dropdown .mega-menu__item.is-active .mega-menu__title {
+  color: var(--primary);
+}
+
+.mega-menu--dropdown .mega-menu__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.mega-menu--dropdown .mega-menu__title {
+  transition: color 0.25s ease;
+}
+
+.mega-menu--dropdown .mega-menu__text {
+  font-size: 0.8rem;
+}
+
+/* ---------- Actions (right): language + CTA + hamburger ---------- */
+.site-header__actions {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.lang-switch {
+  position: relative;
+}
+
+.lang-switch__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.4rem 0.2rem;
+}
+
+.lang-switch__icon {
+  font-size: 1rem;
+  color: var(--text-light);
+  transition: transform 0.5s var(--ease-premium), color 0.4s ease;
+}
+
+.lang-switch__trigger:hover .lang-switch__icon,
+.lang-switch.is-open .lang-switch__icon {
+  transform: rotate(90deg);
+  color: var(--primary);
+}
+
+.lang-switch__menu {
+  position: absolute;
+  top: calc(100% + 0.85rem);
+  right: 0;
+  min-width: 150px;
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity 0.35s var(--ease-premium), transform 0.35s var(--ease-premium), visibility 0.35s;
+}
+
+.lang-switch.is-open .lang-switch__menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.lang-switch__menu button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.lang-switch__menu button:hover,
+.lang-switch__menu button[aria-selected="true"] {
+  background: rgba(var(--primary-rgb), 0.08);
+  color: var(--primary);
+}
+
+.site-header__cta {
+  white-space: nowrap;
+  padding: 0.72rem 1.4rem;
+  font-size: 0.875rem;
+  transition:
+    background 0.35s var(--ease-premium),
+    background-position 0.35s var(--ease-premium),
+    color 0.35s var(--ease-premium),
+    border-color 0.35s var(--ease-premium),
+    box-shadow 0.35s var(--ease-premium),
+    letter-spacing 0.35s ease;
+}
+
+/* Scrolled state: the button's own gradient blue would sit close to a
+   light/glass header, so it flips to an outlined white-on-primary style
+   to stay a clear, separate focal point — solid primary fill on hover
+   for the same "pressed" feedback as the resting state. */
+.site-header.is-scrolled .site-header__cta {
+  background: #fff;
+  background-image: none;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.site-header.is-scrolled .site-header__cta:hover {
+  background: var(--primary);
+  background-image: none;
+  color: #fff;
+  box-shadow: var(--shadow-primary);
+}
+
+/* ---------- Hamburger (mobile trigger) ---------- */
+.hamburger {
+  display: none;
+  position: relative;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.hamburger span {
+  position: absolute;
+  left: 9px;
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--secondary);
+  transition: transform 0.45s var(--ease-premium), opacity 0.3s ease, top 0.45s var(--ease-premium);
+}
+
+.hamburger span:nth-child(1) {
+  top: 14px;
+}
+
+.hamburger span:nth-child(2) {
+  top: 20px;
+}
+
+.hamburger span:nth-child(3) {
+  top: 26px;
+}
+
+.hamburger.is-active span:nth-child(1) {
+  top: 20px;
+  transform: rotate(45deg);
+}
+
+.hamburger.is-active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.is-active span:nth-child(3) {
+  top: 20px;
+  transform: rotate(-45deg);
+}
+
+/* =========================================================================
+   MOBILE FULLSCREEN OFFCANVAS NAV
+   ========================================================================= */
+.mobile-nav {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mobile-nav.is-open {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.mobile-nav__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 15, 30, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-premium);
+}
+
+.mobile-nav.is-open .mobile-nav__backdrop {
+  opacity: 1;
+}
+
+.mobile-nav__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(420px, 88vw);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+  border-left: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem clamp(1.5rem, 5vw, 2.5rem) 2rem;
+  transform: translateX(100%);
+  transition: transform 0.55s var(--ease-premium);
+  overflow-y: auto;
+}
+
+.mobile-nav.is-open .mobile-nav__panel {
+  transform: translateX(0);
+}
+
+.mobile-nav__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+}
+
+.mobile-nav__logo img {
+  height: 46px;
+  width: auto;
+}
+
+.mobile-nav__close {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--primary-rgb), 0.07);
+  border: none;
+  border-radius: 50%;
+  color: var(--secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.4s var(--ease-premium), rotate 0.4s var(--ease-premium);
+}
+
+.mobile-nav__close:hover {
+  background: rgba(var(--primary-rgb), 0.14);
+  transform: rotate(90deg);
+}
+
+.mobile-nav__links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: auto;
+}
+
+.mobile-nav__link {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--secondary);
+  padding: 0.5rem 0;
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.5s var(--ease-premium),
+    transform 0.5s var(--ease-premium),
+    color 0.35s ease,
+    padding-left 0.35s var(--ease-premium);
+}
+
+/* Per-link stagger — driven purely by a CSS custom property set inline
+   by header.js (`--i`), so no GSAP dependency for the mobile menu. */
+.mobile-nav__link {
+  transition-delay: calc(var(--i, 0) * 0.06s);
+}
+
+.mobile-nav.is-open .mobile-nav__link {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mobile-nav__link:hover,
+.mobile-nav__link:focus-visible {
+  color: var(--primary);
+  padding-left: 0.5rem;
+}
+
+/* ---------- Mobile accordion (Company group) ----------
+   Same load-in stagger as the other links (button inherits
+   .mobile-nav__link), plus a tap-to-expand submenu. Height animation
+   uses the CSS grid 0fr→1fr trick — smooth, GPU-friendly, no JS
+   measuring required. */
+.mobile-nav__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-nav__toggle-chevron {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  flex-shrink: 0;
+  margin-left: 0.75rem;
+  transition: transform 0.4s var(--ease-premium), color 0.3s ease;
+}
+
+.mobile-nav__group.is-expanded .mobile-nav__toggle {
+  color: var(--primary);
+}
+
+.mobile-nav__group.is-expanded .mobile-nav__toggle-chevron {
+  transform: rotate(180deg);
+  color: var(--primary);
+}
+
+/* ---------- Mobile accordion, split link + toggle (Production Lines) ----------
+   Same idea as the Company accordion above, but the label itself is a
+   real link (tap navigates to the overview page) and a separate small
+   button opens/collapses the submenu. Laid out exactly like the old
+   combined button — label left, chevron pinned right — and the toggle
+   gets the same load-in stagger as the label so they animate in
+   lockstep. */
+.mobile-nav__group-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.mobile-nav__group-row .mobile-nav__link {
+  flex: 1 1 auto;
+}
+
+.mobile-nav__toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0 0.5rem 0.75rem;
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.5s var(--ease-premium),
+    transform 0.5s var(--ease-premium),
+    color 0.3s ease;
+}
+
+.mobile-nav__toggle-btn {
+  transition-delay: calc(var(--i, 0) * 0.06s);
+}
+
+.mobile-nav.is-open .mobile-nav__toggle-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mobile-nav__toggle-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.mobile-nav__group.is-expanded .mobile-nav__toggle-btn {
+  color: var(--primary);
+}
+
+.mobile-nav__submenu-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s var(--ease-premium);
+}
+
+.mobile-nav__group.is-expanded .mobile-nav__submenu-wrap {
+  grid-template-rows: 1fr;
+}
+
+.mobile-nav__submenu {
+  overflow: hidden;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 0.15rem 0 0.4rem 0.15rem;
+  padding-left: 1.15rem;
+  border-left: 2px solid var(--border);
+}
+
+.mobile-nav__sublink {
+  font-family: 'Manrope', sans-serif;
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--text-light);
+  padding: 0.5rem 0;
+  transition: color 0.3s ease, padding-left 0.35s var(--ease-premium);
+}
+
+.mobile-nav__sublink:hover,
+.mobile-nav__sublink:focus-visible {
+  color: var(--primary);
+  padding-left: 0.35rem;
+}
+
+.mobile-nav__sublink.is-active {
+  color: var(--primary);
+}
+
+.mobile-nav__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--border);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s var(--ease-premium) 0.3s, transform 0.55s var(--ease-premium) 0.3s;
+}
+
+.mobile-nav.is-open .mobile-nav__bottom {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mobile-nav__cta {
+  justify-content: center;
+  width: 100%;
+}
+
+.mobile-nav__lang {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mobile-nav__lang button {
+  flex: 1;
+  padding: 0.55rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: none;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+}
+
+.mobile-nav__lang button[aria-selected="true"],
+.mobile-nav__lang button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.06);
+}
+
+.mobile-nav__contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+  color: var(--text-light);
+}
+
+.mobile-nav__contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.mobile-nav__contact a:hover {
+  color: var(--primary);
+}
+
+.mobile-nav__social {
+  display: flex;
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mobile-nav__social a {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(var(--primary-rgb), 0.07);
+  color: var(--primary);
+  transition: transform 0.4s var(--ease-premium), background 0.3s ease;
+}
+
+.mobile-nav__social a:hover {
+  transform: translateY(-3px) scale(1.08);
+  background: rgba(var(--primary-rgb), 0.14);
+}
+
+/* Lock page scroll while the offcanvas is open (class toggled by header.js). */
+body.mobile-nav-open {
+  overflow: hidden;
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+@media (max-width: 991.98px) {
+
+  .site-header__nav--primary,
+  .site-header__actions .lang-switch,
+  .site-header__actions .site-header__cta {
+    display: none;
+  }
+
+  .site-header__inner {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .site-header__logo {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: start;
+    margin-left: 0.25rem;
+  }
+
+  .hamburger {
+    display: inline-flex;
+  }
+
+  /* Tablet: scale the logo down proportionally from desktop. */
+  .site-header__logo img {
+    height: 58px;
+  }
+
+  .site-header.is-scrolled .site-header__logo img {
+    height: 50px;
+  }
+}
+
+@media (max-width: 575.98px) {
+
+  /* Mobile: a touch smaller again, but still a clear focal point. */
+  /* .site-header__logo img { height: 44px; } */
+  .site-header.is-scrolled .site-header__logo img {
+    height: 42px;
+  }
+}
+
+@media (max-width: 420px) {
+  .mobile-nav__panel {
+    width: 100vw;
+  }
+}
+
+/* =========================================================================
+   ACCESSIBILITY
+   ========================================================================= */
+.site-header__link:focus-visible,
+.lang-switch__trigger:focus-visible,
+.hamburger:focus-visible,
+.mobile-nav__close:focus-visible,
+.mega-menu__item:focus-visible,
+.mobile-nav__toggle:focus-visible,
+.mobile-nav__sublink:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .site-header,
+  .site-header__inner,
+  .site-header__logo img,
+  .site-header__link,
+  .site-header__underline,
+  .mega-menu,
+  .mega-menu--dropdown,
+  .lang-switch__menu,
+  .lang-switch__icon,
+  .hamburger span,
+  .mobile-nav__backdrop,
+  .mobile-nav__panel,
+  .mobile-nav__link,
+  .mobile-nav__bottom,
+  .mobile-nav__toggle-chevron,
+  .mobile-nav__submenu-wrap {
+    transition-duration: 0.001ms !important;
+  }
+}

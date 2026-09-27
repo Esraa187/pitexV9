@@ -1,0 +1,693 @@
+/* =========================================================================
+   PITEX — Global Export Map
+   Reuses: --primary/--primary-rgb/--secondary/--text-light tokens,
+   .section-badge/.section-title/.section-subtitle, .glass-card, .card,
+   .shadow-soft/.radius-xl/.bg-surface, .stats-band/.stat-block (from
+   production-lines.css), .ambient-blob/.particle-field, .ripple,
+   .gsap-* / .js-anim pre-states from animations.css. Only new, section-
+   specific primitives (map stage, markers, popups, routes) are defined
+   here — nothing above is redeclared.
+   NOTE ON MOTION OWNERSHIP: continuous marker pulse/flow animation is
+   CSS-driven (cheap, GPU-friendly, runs independently per marker).
+   One-time scroll reveals (badge → title → map → routes → markers →
+   stats) and pointer-tracked parallax are owned by GSAP in
+   export-map.js, mirroring main.js's split elsewhere on the site.
+   ========================================================================= */
+
+.export-map-section {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --amber: #b8760f;
+  --amber-rgb: 184, 118, 15;
+  --secondary-rgb: 15, 23, 42;
+}
+
+.export-map-section .section-header { margin-bottom: clamp(2.75rem, 5vw, 4rem); }
+
+/* ---------- Background: blueprint grid + radial glows ---------- */
+.export-map-section__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.export-map-section__grid {
+  position: absolute;
+  inset: -1px;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(rgba(var(--primary-rgb), 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--primary-rgb), 0.09) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse 65% 55% at 50% 38%, #000 30%, transparent 85%);
+  mask-image: radial-gradient(ellipse 65% 55% at 50% 38%, #000 30%, transparent 85%);
+}
+
+.export-map-section__glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  pointer-events: none;
+}
+.export-map-section__glow--one {
+  width: 620px;
+  height: 620px;
+  top: -18%;
+  left: -14%;
+  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.1), transparent 70%);
+}
+.export-map-section__glow--two {
+  width: 520px;
+  height: 520px;
+  bottom: -20%;
+  right: -12%;
+  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.08), transparent 70%);
+}
+
+/* ---------- Map stage ---------- */
+.export-map-stage-wrap {
+  position: relative;
+  z-index: 1;
+}
+
+/* Desktop/tablet enlargement — the map itself never crops or zooms here
+   (export-map.js's WORLD_VIEW always shows the complete world at these
+   sizes; only mobile, below, gets the zoomed view window). This block
+   only grows the stage's own on-screen footprint so that same complete
+   map renders bigger, breaking out of the narrower text-column
+   .container-custom width without touching the section header/subtitle
+   above it or the stats band below (both stay at the normal container
+   width — only .export-map-stage-wrap is widened). `width` is set in
+   `vw` and centered on the viewport (not the container) via the
+   left:50% + translateX(-50%) pattern; .export-map-section keeps
+   `overflow: hidden` so this can never introduce horizontal scroll.
+   `aspect-ratio: 1000/500` on .export-map-stage (below) is untouched,
+   so width and height grow together in the map's natural proportion —
+   nothing here distorts the projection. */
+@media (min-width: 992px) {
+  .export-map-stage-wrap {
+    width: 92vw;
+    max-width: 1480px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+@media (min-width: 1200px) {
+  .export-map-stage-wrap {
+    width: 90vw;
+    max-width: 1640px;
+  }
+}
+
+/* No border, no fill color, no shadow, no rounded card edge here on
+   purpose — the map used to sit on its own near-white rounded rectangle
+   with a border and a drop shadow, which read as a distinct component
+   ("card") sitting on top of the section rather than as part of it. The
+   section's own .bg-gradient-soft now shows straight through, so the
+   only thing distinguishing "map area" from "page" is the content
+   itself (land silhouette, markers, labels) — not a container shape.
+   overflow stays hidden purely so the very small hover parallax never
+   lets anything drift past the stage's own layout box; it has no visual
+   edge of its own to reveal. */
+.export-map-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1000 / 500;
+  overflow: hidden;
+  isolation: isolate;
+  cursor: default;
+}
+
+/* An extremely soft, feathered glow rather than a flat fill — it fades
+   to nothing well before the stage's own edges (inset is negative, and
+   the gradient itself tapers out at 72%), so there is no rectangle for
+   the eye to find. This is the "very subtle background treatment" that
+   stays consistent with the page's visual language instead of
+   introducing a boxed one. */
+.export-map-stage::before {
+  content: '';
+  position: absolute;
+  inset: -8%;
+  background: radial-gradient(ellipse 65% 60% at 50% 38%, rgba(var(--primary-rgb), 0.05), transparent 72%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.export-map-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* Real land silhouette (export-map-world.js) — a filled, recognizable
+   world map rather than the previous decorative dot stipple. Recolored
+   to clean white / near-white land with a thin, subtle PITEX-blue
+   outline (no green tint, no gray fill) so the geography reads as a
+   quiet backdrop rather than competing with markers/labels. The
+   top-to-bottom gradient (stops below, referenced via
+   `url(#export-map-land-gradient)` — the <linearGradient> itself is
+   added once by renderWorldLand() in export-map.js) is kept extremely
+   subtle: white at the top fading to a hair of off-white, never a
+   visible color shift. */
+.export-map-land-stop-start { stop-color: #ffffff; }
+.export-map-land-stop-end { stop-color: #f6f9fc; }
+
+.export-map-svg .export-map-land {
+  fill: url(#export-map-land-gradient);
+  stroke: rgba(var(--primary-rgb), 0.22);
+  stroke-width: 0.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 1px 1.5px rgba(15, 23, 42, 0.03));
+}
+
+/* Marker offset leaders (export-map-declutter.js / renderMarkerOffsetLeaders
+   in export-map.js) — a short, quiet line from a marker's true geographic
+   point to the nearby spot it's actually displayed at, drawn only for the
+   handful of locations crowded enough to need the nudge (the Mediterranean/
+   North-Africa/Gulf cluster). Deliberately thinner and lower-contrast than
+   the label leader lines below it, since this is a much shorter distance
+   and needs to read as "barely offset", not as a route. */
+.export-map-svg .export-marker-offset-leader {
+  fill: none;
+  stroke: rgba(15, 23, 42, 0.1);
+  stroke-width: 0.5;
+  stroke-linecap: round;
+}
+
+/* Connecting routes (HQ -> each country) removed from view per request —
+   markers/labels/leader-lines are unaffected. The JS still creates and
+   wires these paths (hover-highlight, reveal timeline), so nothing else
+   has to change; they're just never painted. */
+.export-map-svg .routes {
+  display: none;
+}
+
+.export-map-svg .route-line {
+  fill: none;
+  stroke: rgba(var(--primary-rgb), 0.28);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  transition: stroke 0.4s ease, stroke-width 0.4s ease;
+}
+.export-map-svg .route-line.is-highlighted {
+  stroke: rgba(var(--primary-rgb), 0.8);
+  stroke-width: 2;
+}
+
+.export-map-svg .route-flow {
+  fill: none;
+  stroke: var(--primary-light);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 1 14;
+  opacity: 0.7;
+}
+.js-anim .export-map-svg .route-flow {
+  animation: route-flow-dash 1.8s linear infinite;
+  animation-play-state: paused;
+}
+.export-map-stage.is-revealed .route-flow {
+  animation-play-state: running;
+}
+@keyframes route-flow-dash {
+  to { stroke-dashoffset: -30; }
+}
+
+/* ---------- Markers ---------- */
+.export-map-markers {
+  position: absolute;
+  inset: 0;
+}
+
+.export-marker {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.export-marker__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--primary-rgb), 0.4);
+  animation: marker-pulse 3.2s ease-out infinite;
+}
+.export-marker__pulse--delay { animation-delay: 1.6s; }
+
+/* Static resting marker: a thin PITEX-blue ring around a white disc,
+   with a small solid blue dot centered inside it. The animated pulse
+   rings (above) sit behind this and read as a quiet "alive" halo rather
+   than the marker's actual shape. */
+.export-marker__ring {
+  position: relative;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.75px solid var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(var(--primary-rgb), 0.22), 0 0 0 3px rgba(var(--primary-rgb), 0.08);
+  transition: transform 0.4s var(--ease-premium), box-shadow 0.4s var(--ease-premium), border-color 0.4s ease;
+}
+
+
+
+/* Scale/opacity kept modest (rather than the previous 2.6x/0.65, now
+   toned down further to 1.6x/0.45) because several markers sit only a
+   few pixels apart at real-world proximity (the Mediterranean/MENA
+   cluster) — a large idle pulse there overlaps 3-4 neighboring markers
+   at once and reads as one blurred blob instead of distinct points.
+   This keeps the "alive" feel as a quiet, slow breathing motion rather
+   than something that visually competes with the labels. */
+@keyframes marker-pulse {
+  0% { transform: scale(0.5); opacity: 0.45; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.export-marker:hover .export-marker__ring,
+.export-marker:focus-visible .export-marker__ring,
+.export-marker.is-active .export-marker__ring {
+  transform: scale(1.3);
+  box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.16), 0 0 12px 2px rgba(var(--primary-rgb), 0.5);
+}
+.export-marker:hover .export-marker__pulse,
+.export-marker.is-active .export-marker__pulse {
+  animation-duration: 1.3s;
+}
+.export-marker:focus-visible {
+  outline: none;
+}
+.export-marker:focus-visible .export-marker__ring {
+  box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--primary), 0 0 20px 4px rgba(var(--primary-rgb), 0.7);
+}
+
+.export-marker .ripple { background: rgba(var(--primary-rgb), 0.35); }
+
+/* HQ marker: larger, distinct — same ring+dot shape, PITEX secondary
+   (dark) tone instead of blue so it never reads as just another export
+   destination. */
+.export-marker--hq {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  z-index: 2;
+}
+.export-marker--hq .export-marker__ring {
+  width: 19px;
+  height: 19px;
+  border-color: var(--secondary);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.22), 0 0 0 3px rgba(15, 23, 42, 0.08);
+}
+.export-marker--hq .export-marker__dot {
+  width: 7px;
+  height: 7px;
+  background: var(--secondary);
+}
+.export-marker--hq:hover .export-marker__ring,
+.export-marker--hq:focus-visible .export-marker__ring,
+.export-marker--hq.is-active .export-marker__ring {
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.14), 0 0 12px 2px rgba(15, 23, 42, 0.4);
+}
+.export-marker--hq .export-marker__pulse {
+  border-color: rgba(15, 23, 42, 0.3);
+}
+/* The "PITEX HQ" tag itself is no longer a fixed child of this button —
+   it's rendered as a real .export-label (see below) so it goes through
+   the same collision-avoidance layout as every country label and can
+   never land on top of a nearby marker. */
+
+/* ---------- Destination labels ---------- */
+.export-label-leaders {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.export-label__leader {
+  fill: none;
+  stroke: rgba(var(--secondary-rgb), 0.16);
+  stroke-width: 0.85;
+  stroke-dasharray: 1.2 2.6;
+  stroke-linecap: round;
+  transition: stroke var(--dur-fast) var(--ease-premium), stroke-width var(--dur-fast) var(--ease-premium);
+}
+.export-label__leader.is-active {
+  stroke: rgba(var(--primary-rgb), 0.55);
+  stroke-width: 1.2;
+}
+
+.export-map-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.export-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  pointer-events: auto;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 0.24rem 0.6rem;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+  transition:
+    left 0.35s var(--ease-premium),
+    top 0.35s var(--ease-premium),
+    transform 0.22s var(--ease-premium),
+    box-shadow 0.25s var(--ease-premium),
+    background 0.25s var(--ease-premium),
+    border-color 0.25s var(--ease-premium),
+    color 0.25s ease;
+}
+.export-map-stage.is-revealed .export-label { z-index: 3; }
+
+.export-label:hover,
+.export-label.is-active {
+  background: #fff;
+  border-color: rgba(var(--primary-rgb), 0.3);
+  color: var(--primary);
+  box-shadow: 0 8px 18px rgba(var(--primary-rgb), 0.14), 0 0 0 3px rgba(var(--primary-rgb), 0.06);
+  transform: translate(-50%, -50%) scale(1.06);
+  z-index: 4;
+}
+
+.export-label--compact {
+  font-size: 0.62rem;
+  padding: 0.2rem 0.5rem;
+}
+
+/* PITEX HQ tag: same pill mechanics as a country label (positioning,
+   leader line, collision avoidance) but visually distinct per the brand
+   requirement that HQ always reads as different from export markers. */
+.export-label--hq {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--secondary);
+  background: #fff;
+  border-color: rgba(15, 23, 42, 0.14);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.1);
+}
+.export-label--hq:hover,
+.export-label--hq.is-active {
+  color: var(--secondary);
+  border-color: rgba(15, 23, 42, 0.28);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.15), 0 0 0 3px rgba(15, 23, 42, 0.06);
+}
+.export-label__leader--hq {
+  stroke: rgba(15, 23, 42, 0.28);
+}
+.export-label__leader--hq.is-active {
+  stroke: rgba(15, 23, 42, 0.6);
+}
+
+@media (max-width: 991.98px) {
+  .export-label { font-size: 0.64rem; padding: 0.2rem 0.52rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .export-label { transition: box-shadow 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+}
+
+/* ---------- Popup card ---------- */
+.export-popup {
+  position: absolute;
+  z-index: 5;
+  width: 244px;
+  max-width: 72vw;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.16);
+  padding: 1.1rem 1.2rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, calc(-100% - 20px)) scale(0.94);
+  transform-origin: bottom center;
+  transition: opacity 0.32s var(--ease-premium), transform 0.32s var(--ease-premium), visibility 0.32s;
+  pointer-events: none;
+}
+.export-popup.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, calc(-100% - 20px)) scale(1);
+}
+.export-popup::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.export-popup--below {
+  transform: translate(-50%, 20px) scale(0.92);
+  transform-origin: top center;
+}
+.export-popup--below.is-open { transform: translate(-50%, 20px) scale(1); }
+.export-popup--below::after {
+  bottom: auto;
+  top: -6px;
+  border-right: none;
+  border-bottom: none;
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+}
+
+.export-popup--edge-left { transform: translate(0, calc(-100% - 20px)) scale(0.92); transform-origin: bottom left; }
+.export-popup--edge-left.is-open { transform: translate(0, calc(-100% - 20px)) scale(1); }
+.export-popup--edge-left::after { left: 22px; transform: rotate(45deg); }
+.export-popup--edge-left.export-popup--below { transform: translate(0, 20px) scale(0.92); transform-origin: top left; }
+.export-popup--edge-left.export-popup--below.is-open { transform: translate(0, 20px) scale(1); }
+
+.export-popup--edge-right { transform: translate(-100%, calc(-100% - 20px)) scale(0.92); transform-origin: bottom right; }
+.export-popup--edge-right.is-open { transform: translate(-100%, calc(-100% - 20px)) scale(1); }
+.export-popup--edge-right::after { left: auto; right: 22px; transform: rotate(45deg); }
+.export-popup--edge-right.export-popup--below { transform: translate(-100%, 20px) scale(0.92); transform-origin: top right; }
+.export-popup--edge-right.export-popup--below.is-open { transform: translate(-100%, 20px) scale(1); }
+
+.export-popup__head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.5rem;
+}
+.export-popup__flag {
+  font-size: 1.05rem;
+  line-height: 1;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(var(--primary-rgb), 0.06);
+}
+.export-popup__country {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 0.98rem;
+  line-height: 1.25;
+  color: var(--secondary);
+}
+.export-popup__city {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-light);
+  margin: 0 0 0.75rem;
+}
+.export-popup__project {
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.55;
+  margin: 0 0 0.7rem;
+}
+.export-popup__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--text-light);
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--border);
+}
+.export-popup__meta:first-of-type { border-top: none; padding-top: 0; }
+.export-popup__meta strong { color: var(--secondary); font-weight: 700; }
+
+.export-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+}
+.export-status::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.export-status--operational {
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.09);
+}
+.export-status--commissioning {
+  color: var(--amber);
+  background: rgba(var(--amber-rgb), 0.12);
+}
+.export-status--headquarters {
+  color: var(--secondary);
+  background: rgba(15, 23, 42, 0.08);
+}
+
+/* ---------- Legend ---------- */
+.export-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.75rem;
+}
+.export-map-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-light);
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  padding: 0.42rem 0.9rem;
+  border-radius: 999px;
+}
+.export-map-legend__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+.export-map-legend__dot--commissioning {
+  background: var(--amber);
+  box-shadow: 0 0 0 3px rgba(var(--amber-rgb), 0.1);
+}
+.export-map-legend__dot--hq {
+  background: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(var(--secondary-rgb), 0.1);
+}
+
+/* ---------- Stats band ---------- */
+.export-map-stats-wrap {
+  position: relative;
+  z-index: 1;
+  margin-top: clamp(3rem, 5vw, 4.5rem);
+}
+.export-map-stats-wrap .stats-band {
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.06);
+}
+.export-map-stats-wrap .stat-block__value { letter-spacing: -0.01em; }
+
+/* Equal-width, equal-gap layout for the three home-page stats — scoped to
+   this section only so the shared .stat-block component (also used by
+   production-lines.html) keeps its original content-hugging width there. */
+.export-map-stats-wrap .stat-block {
+  flex: 1 1 140px;
+}
+
+/* ---------- Responsive ----------
+   Below 768px export-map.js also swaps the SVG's viewBox (and every
+   marker/label's projection) from the full world to MOBILE_VIEW — a
+   crop centered on Europe + North Africa + the Mediterranean + the
+   Middle East, where every PITEX location sits — so mobile shows a
+   zoomed-in region instead of a tiny complete world map. The stage here
+   is additionally kept taller than the map's own 1000:500 (2:1) ratio;
+   export-map.js letterboxes whichever view (world or cropped) within it
+   using the same "meet" math the browser itself uses, and positions
+   every marker/label against that same math, so the extra height
+   becomes real, correctly-aligned breathing room for the destination
+   labels rather than dead space or a source of drift — every country's
+   label stays visible and on-model at every size below, no labels are
+   hidden on mobile. */
+@media (max-width: 767.98px) {
+  .export-map-stage { aspect-ratio: 1000 / 680; }
+  .export-popup { width: 208px; padding: 0.85rem 0.95rem; }
+  .export-marker { width: 22px; height: 22px; margin: -11px 0 0 -11px; }
+  .export-marker__ring { width: 13px; height: 13px; }
+  .export-marker__dot { width: 4px; height: 4px; }
+  .export-marker--hq { width: 30px; height: 30px; margin: -15px 0 0 -15px; }
+  .export-marker--hq .export-marker__ring { width: 17px; height: 17px; }
+}
+
+
+
+/* Very small phones: the 9-country label set needs a bit more vertical
+   room to stay legible without the leader-line layout having to force
+   heavier overlap-resolution. */
+@media (max-width: 420px) {
+  .export-map-stage { aspect-ratio: 1000 / 820; }
+  .export-popup { width: 188px; padding: 0.75rem 0.85rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .export-marker__pulse,
+  .export-map-svg .route-flow {
+    animation: none !important;
+  }
+  .export-marker__pulse { opacity: 0; }
+}

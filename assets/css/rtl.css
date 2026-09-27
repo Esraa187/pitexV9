@@ -1,0 +1,211 @@
+/* =========================================================================
+   PITEX — rtl.css
+   Minimal, additive RTL overrides. Loaded LAST, after every other
+   stylesheet, so it always wins the cascade without needing !important.
+
+   Per the project brief, the existing stylesheets were NOT rewritten wholesale
+   into logical properties — that's a larger, higher-risk refactor across
+   ~15 CSS files that risks shifting spacing/layout on the English site.
+   Instead this file:
+
+     1. Swaps the base font to one with proper Arabic shaping/kerning.
+     2. Fixes the small number of components that use *physical* left/right
+        (float, absolute-position offsets, transforms) and would look
+        broken or mirrored incorrectly in RTL.
+     3. Flips any icon marked data-rtl-flip (arrows whose meaning is
+        directional, e.g. "next" / "learn more →").
+
+   NEW CSS going forward should prefer logical properties (margin-inline,
+   padding-inline, inset-inline, text-align:start/end) so it never needs an
+   entry in this file at all — see the migration guide for the full list
+   of logical-property equivalents.
+   ========================================================================= */
+
+/* Almarai is the Arabic font site-wide. Applied to every element (not
+   just body) because a lot of components — headings, badges, buttons,
+   labels, nav links, footer, breadcrumbs — set their own explicit
+   `font-family: 'Manrope'`, which would otherwise win over an inherited
+   body font for that element. Since this file loads last on every page,
+   `[dir="rtl"] *` (same specificity as a single class selector) wins the
+   cascade by source order alone — no !important needed. English/LTR
+   pages are completely untouched; Manrope stays the site's Latin font. */
+[dir="rtl"] body,
+[dir="rtl"] * {
+  font-family: 'Almarai', 'IBM Plex Sans Arabic', 'Manrope', sans-serif;
+}
+
+/* Directional icons (arrows on buttons/links/carousel controls) — mirror
+   in RTL so they still point toward "forward" in reading-direction terms. */
+[dir="rtl"] [data-rtl-flip] {
+  display: inline-block;
+  transform: scaleX(-1);
+}
+
+/* Arrow-nudge hover animation on .btn-arrow (utilities.css: primary/light/
+   glass button variants) — moves the arrow icon +7px on hover as a "step
+   forward" cue. That offset is a physical translateX, so under dir="rtl"
+   it would keep nudging toward the *visual* right even though the arrow
+   itself is now mirrored (data-rtl-flip) and sits at the *start* (right)
+   of the Arabic label, pointing left. Reverse the sign here so the nudge
+   still reads as "forward" in RTL reading direction, i.e. toward the
+   left. Everything else about the hover effect (timing, easing, shadow,
+   letter-spacing) is untouched — only which way the arrow steps. */
+[dir="rtl"] .btn-primary-custom:hover .btn-arrow,
+[dir="rtl"] .btn-light-custom:hover .btn-arrow,
+[dir="rtl"] .btn-glass-custom:hover .btn-arrow {
+  transform: translateX(-7px);
+}
+
+/* Same physical-nudge issue on the footer link list chevrons
+   (style.css: .footer-link__chevron, bi-chevron-right, present on every
+   page's footer) and the card/insight link-arrow hover nudge
+   (utilities.css: .link-arrow svg/i) — both already get mirrored via
+   data-rtl-flip, but their hover step is a raw +translateX too. */
+[dir="rtl"] .footer-link:hover .footer-link__chevron {
+  transform: translateX(-3px);
+}
+[dir="rtl"] .card:hover .link-arrow svg,
+[dir="rtl"] .card:hover .link-arrow i,
+[dir="rtl"] .link-arrow:hover svg,
+[dir="rtl"] .link-arrow:hover i {
+  transform: translateX(-6px);
+}
+
+/* Bootstrap grid/utility classes that hard-code physical direction and
+   ship as external CSS (so they can't be edited in place) — force the
+   logical equivalent only inside dir="rtl" scope. */
+[dir="rtl"] .text-start { text-align: right !important; }
+[dir="rtl"] .text-end { text-align: left !important; }
+
+/* Mega-menu / dropdown panels anchored with a physical `left`/`right` — add
+   the mirrored offset here rather than editing header.css, since these
+   values are computed against the trigger's position, not the container. */
+[dir="rtl"] .mega-menu--dropdown {
+  left: auto;
+}
+
+/* Hero content and section text that assumes LTR reading order for
+   underlines/marquee direction. Bootstrap's own RTL handling covers the
+   grid (col ordering, gutters); this covers PITEX-authored components. */
+[dir="rtl"] .site-header__underline {
+  right: 0;
+  left: auto;
+}
+
+/* Quote/contact form validation icons and input affordances that are
+   absolutely positioned relative to a physical edge. */
+[dir="rtl"] .form-control,
+[dir="rtl"] .form-select {
+  text-align: right;
+}
+
+/* Trusted-partners logo marquee — a decorative, continuously-scrolling
+   `translate3d(-50%,0,0)` loop over two identical, adjacent flex groups
+   of Latin brand wordmarks (see .trusted-marquee__track in style.css).
+   `display:flex` lays its children out in *inline* direction, which
+   flips under `dir="rtl"` by default — reversing the visual order of
+   both groups the instant the page switches to Arabic, mid-animation.
+   Since the ongoing CSS animation keeps translating by raw pixels
+   regardless of that reversal, the reversal reads as the marquee
+   visibly jumping/stalling for a frame and then "restarting" in the
+   new mirrored order — the exact stutter this rule prevents by simply
+   never letting the track's flex order flip in the first place. The
+   marquee's own edge fades stay physically left/right on purpose,
+   unaffected by this since they're positioned on the outer wrapper.
+*/
+[dir="rtl"] .trusted-marquee {
+  direction: ltr;
+}
+
+/* Page breadcrumbs (Home > Current Page) — DOM order is deliberately
+   "home link, chevron, current page" everywhere in the markup, and the
+   ">" glyph is a static bi-chevron-right icon, not a bidi-aware
+   character.
+
+   The actual bug (confirmed by rendering the page and reading real
+   getBoundingClientRect() positions, not just reasoning about the CSS):
+   every breadcrumb item's text is now 100% Arabic once translated, and
+   none of `<a>`/`<i>`/`<span>` establish their own bidi context. With no
+   boundary between them, the browser's Unicode Bidi Algorithm doesn't
+   see three separate items — it sees ONE continuous right-to-left run
+   stretching from the first letter of "Home" through the last letter of
+   "Current Page" (the empty icon in between doesn't break it). A single
+   RTL run embedded in the page reverses as a whole, so the *last* DOM
+   item ends up displayed first and the *first* DOM item ends up
+   displayed last — "Current Page > Home" — regardless of `direction`,
+   because `direction` only sets the base paragraph level; it doesn't by
+   itself stop sibling elements' text from merging into one bidi run.
+
+   The fix needs both parts:
+   1. `direction: ltr` on the container — without it, the *order* the
+      isolated runs are laid out in (next rule) would itself follow RTL.
+   2. `unicode-bidi: isolate` on the container AND on each item — this
+      is what actually stops "Home" and "Current Page" from merging into
+      a single reversible run. Each item becomes its own independent
+      bidi context: its Arabic text still shapes/reads correctly
+      right-to-left *inside* itself, but the three items now sit in
+      DOM/logical order as three separate atomic units, exactly like
+      Arabic words mixed into an English sentence normally do.
+
+   Verified in a real headless-Chromium render on both a `display:flex`
+   breadcrumb (products.html) and a plain `display:block` one
+   (about.html, leadership.html, contact.html, ... — most inner pages
+   don't load production-lines.css so `.breadcrumb-custom` never
+   actually becomes flex there); this combination renders
+   "Home > Current Page" correctly in both layouts, with the ">"
+   consistent and never mirrored. No row-reverse, no icon flip needed —
+   only the label *text* changes between languages. */
+[dir="rtl"] .breadcrumb-custom {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+[dir="rtl"] .breadcrumb-custom > a,
+[dir="rtl"] .breadcrumb-custom > span,
+[dir="rtl"] .breadcrumb-custom > i {
+  unicode-bidi: isolate;
+}
+
+/* Belt-and-suspenders: the ">" chevron between breadcrumb items must
+   never be treated as a directional icon and mirrored — unlike
+   `.next-*`/"learn more" arrows elsewhere in the site, this glyph is a
+   plain list separator, not something that means "forward". Explicitly
+   locking it to no transform means it stays ">" in English AND Arabic
+   even if the icon is ever accidentally tagged data-rtl-flip later.
+   Applies site-wide: every banner breadcrumb (About, Contact, Leadership,
+   Certificates, Gallery, Success Partners, Career, Production Lines,
+   Categories, Products, Product Details) shares this one `.breadcrumb-
+   custom` component/class, so this single rule covers all of them. */
+[dir="rtl"] .breadcrumb-custom i {
+  transform: none;
+}
+
+/* Process/journey timeline (.process-section on index/careers,
+   .journey-section on about) — shared component (style.css + about.css's
+   .timeline--journey modifier). The line's own position/inset already
+   uses inset-inline-start/end so it relocates to the correct physical
+   edge automatically (right on desktop's symmetric inset, right on the
+   mobile vertical rail), and .timeline-item's flex-direction:row already
+   reverses icon/content order under dir="rtl" per the flexbox spec — so
+   neither needs a rule here.
+
+   The one thing logical properties can't express is transform-origin:
+   the connector's fill/glow is scaleX()'d by GSAP from a fixed CSS
+   transform-origin (main.js/about.js only ever animate the scale, never
+   the origin). In LTR it's anchored 'left center' so the line draws
+   left-to-right, matching item 1 (leftmost, due to flexbox's own RTL
+   reversal) through item N (rightmost). In RTL the reversal puts item 1
+   on the right instead, so the draw-in must start from the opposite
+   physical edge or it plays backwards relative to the milestone order. */
+[dir="rtl"] .timeline-line__fill,
+[dir="rtl"] .timeline--journey .timeline-line__glow {
+  transform-origin: right center;
+}
+
+/* Mobile vertical rail (<768px): the line runs top-to-bottom there, which
+   isn't direction-dependent, so restore the vertical origin the rule
+   above would otherwise override. */
+@media (max-width: 767.98px) {
+  [dir="rtl"] .timeline-line__fill {
+    transform-origin: top center;
+  }
+}

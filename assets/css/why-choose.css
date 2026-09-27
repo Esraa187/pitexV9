@@ -1,0 +1,324 @@
+/* =========================================================================
+   PITEX — why-choose.css
+   "Why Industry Leaders Choose PITEX" — the section reuses the same
+   building blocks as .about-section (container-custom, section-badge,
+   section-title, section-description, .particle-field/.ambient-blob,
+   the gsap-fade-up / gsap-slide-left / gsap-stagger-item entrance
+   utilities from animations.css) and the same tokens from utilities.css
+   (--primary, --primary-rgb, --radius-*, --shadow-*, --ease-premium).
+
+   Nothing here redeclares a global token or a shared typography class —
+   only what's genuinely unique to this section lives in this file: the
+   45/55 media/content split, the machine-photo frame, the six hotspots,
+   and the numbered reasons list.
+   ========================================================================= */
+
+.why-choose-section { position: relative; }
+
+/* ---------- 45 / 55 split (About uses ~0.95fr/1fr; this section skews
+   further toward the content column per the design refresh) ---------- */
+.why-choose-grid {
+  display: grid;
+  grid-template-columns: minmax(0, .89fr) minmax(0, 1fr);
+  gap: clamp(3rem, 6vw, 5.5rem);
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================================
+   MEDIA COLUMN — same visual language as .about-media__frame (radius-xl,
+   shadow-lg, primary-tinted multiply overlay) so the two split sections
+   in this page read as siblings.
+   ========================================================================= */
+
+.why-choose-media { position: relative; width: 100%;  }
+
+.why-choose-media__frame {
+  position: relative;
+  width: 100%;
+  /* height: 100%; */
+  border-radius: var(--radius-xl);
+   overflow: hidden; 
+  aspect-ratio: 4 / 5;
+  box-shadow: var(--shadow-lg);
+  isolation: isolate;
+}
+
+.why-choose-media__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+  will-change: transform;
+}
+
+.why-choose-media__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(155deg, rgba(var(--primary-rgb), 0.4) 0%, transparent 55%),
+              linear-gradient(0deg, rgba(var(--primary-rgb), 0.55) 0%, transparent 42%);
+  mix-blend-mode: multiply;
+}
+
+/* =========================================================================
+   HOTSPOTS — unique to this section; no equivalent component exists
+   elsewhere in the design system yet. Colors/shadows are borrowed
+   directly from the .feature-item__icon hover recipe for consistency.
+   ========================================================================= */
+
+.why-choose-hotspots {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
+
+.hotspot {
+  position: absolute;
+  top: var(--hy);
+  left: var(--hx);
+  transform: translate(-50%, -50%) scale(0.6);
+  display: flex;
+  align-items: center;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  opacity: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hotspot.is-visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  transition: opacity var(--dur-mid) var(--ease-premium), transform var(--dur-mid) var(--ease-premium);
+}
+
+.hotspot--flip { flex-direction: row-reverse; }
+
+.hotspot__marker { position: relative; width: 12px; height: 12px; flex-shrink: 0; }
+
+.hotspot__dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 0 14px 2px rgba(255, 255, 255, 0.55);
+  transition: background var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+}
+
+.hotspot__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  animation: wc-pulse 2.6s ease-out infinite;
+}
+.hotspot__pulse--2 { animation-delay: 1.3s; }
+
+@keyframes wc-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+.hotspot:hover .hotspot__dot,
+.hotspot:focus-visible .hotspot__dot,
+.hotspot.is-open .hotspot__dot,
+.hotspot.is-active .hotspot__dot {
+  background: var(--primary-light);
+  box-shadow: 0 0 0 6px rgba(var(--primary-rgb), 0.28), 0 10px 22px rgba(var(--primary-rgb), 0.5);
+}
+
+.hotspot__connector {
+  width: 42px;
+  height: 1px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.25));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.5s var(--ease-premium), background var(--dur-fast) ease;
+}
+.hotspot.is-visible .hotspot__connector { transform: scaleX(1); }
+.hotspot--flip .hotspot__connector {
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.25));
+  transform-origin: right center;
+}
+.hotspot:hover .hotspot__connector,
+.hotspot.is-open .hotspot__connector,
+.hotspot.is-active .hotspot__connector {
+  background: linear-gradient(90deg, var(--primary-light), rgba(var(--primary-rgb), 0.15));
+}
+.hotspot--flip:hover .hotspot__connector,
+.hotspot--flip.is-open .hotspot__connector,
+.hotspot--flip.is-active .hotspot__connector {
+  background: linear-gradient(270deg, var(--primary-light), rgba(var(--primary-rgb), 0.15));
+}
+
+.hotspot__label {
+  flex-shrink: 0;
+  max-width: 220px;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: rgba(10, 30, 58, 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-left: 2px solid rgba(255, 255, 255, 0.7);
+  text-align: left;
+}
+.hotspot--flip .hotspot__label {
+  border-left: none;
+  border-right: 2px solid rgba(255, 255, 255, 0.7);
+  text-align: right;
+}
+
+.hotspot__title {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.hotspot__desc {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: normal;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.35s var(--ease-premium), opacity var(--dur-fast) ease, margin-top 0.35s ease;
+}
+
+.hotspot:hover .hotspot__desc,
+.hotspot:focus-visible .hotspot__desc,
+.hotspot.is-open .hotspot__desc {
+  max-height: 3.6em;
+  opacity: 1;
+  margin-top: 0.2rem;
+}
+
+.hotspot:hover .hotspot__label,
+.hotspot:focus-visible .hotspot__label,
+.hotspot.is-open .hotspot__label,
+.hotspot.is-active .hotspot__label {
+  border-color: var(--primary-light);
+}
+
+.hotspot:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 6px;
+  border-radius: var(--radius-md);
+}
+
+/* =========================================================================
+   CONTENT COLUMN — badge/title/description are the shared .section-badge
+   / .section-title / .section-description classes (see index.html); only
+   the spacing hook and the reasons list below are unique to this section.
+   ========================================================================= */
+
+.why-choose-content .section-description { max-width: 48ch; }
+
+.why-choose-list {
+  margin: 2.25rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+.why-choose-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+  padding: 1.05rem 0.25rem 1.05rem 1rem;
+  border-bottom: 1px solid var(--border);
+  transition: transform var(--dur-mid) var(--ease-premium), padding-left var(--dur-mid) var(--ease-premium);
+}
+
+.why-choose-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  transform-origin: center;
+  width: 3px;
+  height: 70%;
+  background: linear-gradient(150deg, var(--primary-light) 0%, var(--primary) 55%, var(--primary-dark) 100%);
+  border-radius: var(--radius-md);
+  transition: transform var(--dur-mid) var(--ease-premium);
+}
+
+.why-choose-item.is-active { padding-left: 1.4rem; transform: translateX(4px); }
+.why-choose-item.is-active::before { transform: translateY(-50%) scaleY(1); }
+
+.why-choose-item__num {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-light);
+  opacity: 0.55;
+  padding-top: 0.15rem;
+  min-width: 1.5rem;
+  transition: color var(--dur-mid) ease, opacity var(--dur-mid) ease;
+}
+.why-choose-item.is-active .why-choose-item__num { color: var(--primary); opacity: 1; }
+
+.why-choose-item__title {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--secondary);
+  margin: 0 0 0.3rem;
+  transition: color var(--dur-mid) ease;
+}
+.why-choose-item.is-active .why-choose-item__title { color: var(--primary); }
+
+.why-choose-item__text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-light);
+  margin: 0;
+  max-width: 40ch;
+}
+
+/* =========================================================================
+   PRE-JS state for the hotspots only — badge/title/description/list items
+   already get their pre-hidden state for free from .gsap-fade-up and
+   .gsap-stagger-item in animations.css.
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .hotspot { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  .hotspot__connector { transform: scaleX(1) !important; }
+  .hotspot__pulse { animation: none; }
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+
+@media (max-width: 991.98px) {
+  .why-choose-grid { grid-template-columns: 1fr; }
+  .why-choose-media__frame { aspect-ratio: 16 / 10; }
+}
+
+@media (max-width: 767.98px) {
+  .why-choose-media__frame { aspect-ratio: 4 / 5; }
+  .hotspot__label { max-width: 150px; padding: 0.32rem 0.6rem; }
+  .hotspot__title { font-size: 0.7rem; }
+  .hotspot__desc { font-size: 0.65rem; }
+  .hotspot__connector { width: 24px; }
+}
+
+@media (max-width: 575.98px) {
+  .hotspot__label { max-width: 118px; }
+  .hotspot__desc { display: none; }
+}

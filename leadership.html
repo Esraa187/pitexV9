@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- =====================================================================
+       EARLY LANGUAGE INIT (must stay first in <head>, before any CSS/JS
+       that isn't itself part of this block) — fixes the Arabic/English
+       FOUC (flash of untranslated content) on page load and navigation.
+
+       Runs synchronously, before the browser paints anything:
+         1. Reads the saved language from localStorage (same key
+            language.js uses) and sets <html lang dir> immediately, so
+            layout direction is correct from the very first pixel.
+         2. Hides <body> (visibility, not display — no layout shift) via
+            the inline <style> right below, so *even the static English
+            text already sitting in the HTML* never becomes visible
+            before translator.js overwrites it.
+         3. language.js removes the 'i18n-boot' class the moment its
+            first translateElement() pass finishes (typically a
+            fraction of a millisecond after DOMContentLoaded, since the
+            dictionary is preloaded synchronously via lang-inline-data.js
+            just below — no network fetch is on the critical path).
+         4. The setTimeout below is only a safety net in case JS fails
+            to load/execute for some reason — the page reveals itself
+            after 1.5s no matter what, so a script error never leaves
+            a permanently blank page.
+       ===================================================================== -->
+  <script>
+    (function () {
+      var STORAGE_KEY = 'pitex_lang'; // must match language.js
+      var SUPPORTED = ['en', 'ar'];
+      var RTL = ['ar'];
+      var saved = null;
+      try { saved = window.localStorage.getItem(STORAGE_KEY); } catch (e) {}
+      var browserLang = (navigator.language || '').slice(0, 2);
+      var lang = (saved && SUPPORTED.indexOf(saved) !== -1 && saved) ||
+        (SUPPORTED.indexOf(browserLang) !== -1 && browserLang) ||
+        'en';
+      var html = document.documentElement;
+      html.setAttribute('lang', lang);
+      html.setAttribute('dir', RTL.indexOf(lang) !== -1 ? 'rtl' : 'ltr');
+      html.classList.add('i18n-boot');
+      window.__PITEX_INITIAL_LANG__ = lang;
+      window.__PITEX_I18N_TIMEOUT__ = setTimeout(function () {
+        html.classList.remove('i18n-boot');
+      }, 1500);
+    })();
+  </script>
+  <style>
+    /* Paired with the script above: keeps the page invisible only for the
+       brief window between "HTML parsed" and "first translate pass done".
+       visibility (not display) is used so no element ever changes size or
+       position when the class is removed - zero layout shift. */
+    html.i18n-boot body { visibility: hidden; opacity: 0; }
+    body { transition: opacity .15s ease; }
+  </style>
+  <noscript>
+    <style>html.i18n-boot body { visibility: visible; opacity: 1; }</style>
+  </noscript>
+
+  <!-- Embedded EN/AR dictionaries, loaded synchronously (no `defer`) so
+       they're sitting in memory before <body> is even parsed - the first
+       translateElement() pass never has to wait on a network fetch. -->
+  <script src="assets/js/lang-inline-data.js"></script>
+    <title>Document</title>
+
+    <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap grid only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Lenis (buttery smooth scroll) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.css">
+
+  <!-- Design system (unchanged, reused as-is) -->
+  <link rel="stylesheet" href="assets/css/utilities.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/header.css">
+  <link rel="stylesheet" href="assets/css/animations.css">
+  <link rel="stylesheet" href="assets/css/leadership.css?v=4">
+  <link rel="stylesheet" href="assets/css/page-banner.css">
+  <link rel="stylesheet" href="assets/css/rtl.css">
+</head>
+<body>
+    <!-- =========================================================
+       HEADER / PRIMARY NAVIGATION
+       ========================================================= -->
+  <header class="site-header" id="siteHeader" data-header>
+    <div class="container site-header__inner">
+
+      <nav class="site-header__nav--primary" aria-label="Primary">
+        <ul class="site-header__list">
+
+          <li class="site-header__item">
+            <a href="index.html" class="site-header__link" data-nav-link data-section="about">
+              <span data-i18n="common.nav.home">Home</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+
+          <li class="site-header__item site-header__item--has-mega" data-mega-item>
+            <button type="button" class="site-header__link site-header__link--trigger" aria-haspopup="true"
+              aria-expanded="false" aria-controls="companyMenu" data-section="features" data-mega-trigger>
+              <span data-i18n="common.nav.company">Company</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+              <i class="bi bi-chevron-down site-header__chevron" aria-hidden="true"></i>
+            </button>
+
+            <div class="mega-menu mega-menu--dropdown glass-card" id="companyMenu" data-mega-panel role="menu"
+              aria-label="Company">
+              <div class="mega-menu__grid">
+                <a href="about.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.about">Our Story</span>
+                  </span>
+                </a>
+                <a href="leadership.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.leadership">Leadership</span>
+                  </span>
+                </a>
+                <a href="certificates.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.certificates">Certificates</span>
+                  </span>
+                </a>
+                <a href="success-partners.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.successPartners">Success Partners</span>
+                  </span>
+                </a>
+                <a href="careers.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.career">Career</span>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </li>
+
+          <li class="site-header__item">
+            <a href="services.html" class="site-header__link" data-nav-link>
+              <span data-i18n="common.nav.services">Services</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+
+          <li class="site-header__item site-header__item--has-mega" data-mega-item>
+            <a href="production-lines.html" id="navProductionLines" class="site-header__link site-header__link--trigger"
+              data-nav-link data-mega-link data-section="about">
+              <span data-i18n="common.nav.productionLines">Production Lines</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+            <button type="button" class="site-header__mega-toggle" aria-haspopup="true" aria-expanded="false"
+              aria-controls="productionLinesMenu" aria-label="Show Production Lines menu" data-mega-trigger>
+              <i class="bi bi-chevron-down site-header__chevron" aria-hidden="true"></i>
+            </button>
+
+            <div class="mega-menu mega-menu--dropdown mega-menu--wide glass-card" id="productionLinesMenu" data-mega-panel role="menu"
+              aria-label="Production Lines">
+              <div class="mega-menu__grid">
+                <a href="products.html?category=pitting-slicing-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.pittingSlicing">Pitting &amp; Slicing Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=olive-grading-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.oliveGrading">Olive Grading Line (Standard Olive Sizing)</span>
+                  </span>
+                </a>
+                <a href="products.html?category=filling-pasteurization-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.fillingPasteurization">Filling &amp; Pasteurization Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=roasting-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.roasting">Roasting Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=pepper-cucumber-perforation-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.pepperCucumber">Pepper &amp; Cucumber Perforation Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=pickle-mixing-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.pickleMixing">Pickle Mixing Line</span>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </li>
+
+          <li class="site-header__item">
+            <a href="gallary.html" class="site-header__link" data-nav-link>
+              <span data-i18n="common.nav.gallery">Gallery</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+
+          <li class="site-header__item">
+            <a href="contact.html" class="site-header__link" data-nav-link data-section="contact">
+              <span data-i18n="common.nav.contact">Contact Us</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <a href="#" class="site-header__logo" aria-label="PITEX home" data-header-logo>
+        <img src="assets/images/pitex-logo.png" alt="PITEX" loading="eager" decoding="async" />
+      </a>
+
+      <div class="site-header__actions">
+
+        <div class="lang-switch" data-lang-switch>
+          <button type="button" class="lang-switch__trigger" aria-haspopup="listbox" aria-expanded="false"
+            data-lang-trigger>
+            <i class="bi bi-globe2 lang-switch__icon" aria-hidden="true"></i>
+            <span data-lang-current>EN</span>
+          </button>
+          <ul class="lang-switch__menu" role="listbox" data-i18n-attr-aria-label="common.langSwitch.selectLanguage" aria-label="Select language" data-lang-menu>
+            <li role="option" aria-selected="true"><button type="button" data-lang="en">English</button></li>
+            <li role="option" aria-selected="false"><button type="button" data-lang="ar">العربية</button></li>
+          </ul>
+        </div>
+
+        <button type="button" class="btn-primary-custom site-header__cta" data-header-cta>
+          <span data-i18n="common.header.requestQuote">Request Quote</span>
+          <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+        </button>
+
+        <button type="button" class="hamburger" data-i18n-attr-aria-label="common.header.openMenu" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav"
+          data-hamburger>
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MOBILE FULLSCREEN OFFCANVAS NAVIGATION -->
+  <div class="mobile-nav" id="mobileNav" data-mobile-nav aria-hidden="true">
+    <div class="mobile-nav__backdrop" data-mobile-backdrop></div>
+
+    <div class="mobile-nav__panel" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+      <div class="mobile-nav__top">
+        <a href="#" class="mobile-nav__logo" aria-label="PITEX home">
+          <img src="assets/images/pitex-logo.png" alt="PITEX" width="480" height="345" loading="lazy" />
+        </a>
+        <button type="button" class="mobile-nav__close" aria-label="Close menu" data-mobile-close>
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <nav class="mobile-nav__links" aria-label="Mobile primary">
+        <a href="index.html" class="mobile-nav__link" data-mobile-link style="--i:0" data-i18n="common.nav.home">Home</a>
+
+        <div class="mobile-nav__group" data-mobile-group>
+          <button type="button" class="mobile-nav__link mobile-nav__toggle" data-mobile-toggle
+            aria-expanded="false" aria-controls="mobileCompanyMenu" style="--i:1">
+            <span data-i18n="common.nav.company">Company</span>
+            <i class="bi bi-chevron-down mobile-nav__toggle-chevron" aria-hidden="true"></i>
+          </button>
+          <div class="mobile-nav__submenu-wrap" id="mobileCompanyMenu" data-mobile-submenu>
+            <div class="mobile-nav__submenu">
+              <a href="about.html" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.about">Our Story</a>
+              <a href="leadership.html" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.leadership">Leadership</a>
+              <a href="certificates.html" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.certificates">Certificates</a>
+              <a href="success-partners.html" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.successPartners">Success Partners</a>
+              <a href="careers.html" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.career">Career</a>
+            </div>
+          </div>
+        </div>
+
+        <a href="services.html" class="mobile-nav__link" data-mobile-link style="--i:2" data-i18n="common.nav.services">Services</a>
+
+        <div class="mobile-nav__group" data-mobile-group>
+          <div class="mobile-nav__group-row">
+            <a href="production-lines.html" id="navProductionLinesMobile" class="mobile-nav__link" data-mobile-link style="--i:3" data-i18n="common.nav.productionLines">Production Lines</a>
+            <button type="button" class="mobile-nav__toggle-btn" data-mobile-toggle
+              aria-expanded="false" aria-controls="mobileProductionLinesMenu" aria-label="Show Production Lines menu" style="--i:3">
+              <i class="bi bi-chevron-down mobile-nav__toggle-chevron" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="mobile-nav__submenu-wrap" id="mobileProductionLinesMenu" data-mobile-submenu>
+            <div class="mobile-nav__submenu">
+              <a href="products.html?category=pitting-slicing-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.pittingSlicing">Pitting &amp; Slicing Line</a>
+              <a href="products.html?category=olive-grading-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.oliveGrading">Olive Grading Line (Standard Olive Sizing)</a>
+              <a href="products.html?category=filling-pasteurization-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.fillingPasteurization">Filling &amp; Pasteurization Line</a>
+              <a href="products.html?category=roasting-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.roasting">Roasting Line</a>
+              <a href="products.html?category=pepper-cucumber-perforation-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.pepperCucumber">Pepper &amp; Cucumber Perforation Line</a>
+              <a href="products.html?category=pickle-mixing-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.pickleMixing">Pickle Mixing Line</a>
+            </div>
+          </div>
+        </div>
+
+        <a href="gallary.html" class="mobile-nav__link" data-mobile-link style="--i:4" data-i18n="common.nav.gallery">Gallery</a>
+        <a href="contact.html" class="mobile-nav__link" data-mobile-link style="--i:5" data-i18n="common.nav.contact">Contact Us</a>
+      </nav>
+
+      <div class="mobile-nav__bottom">
+        <button type="button" class="btn-primary-custom mobile-nav__cta">
+          <span data-i18n="common.header.requestQuote">Request Quote</span>
+          <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+        </button>
+
+        <div class="mobile-nav__lang" role="group" data-i18n-attr-aria-label="common.langSwitch.selectLanguage" aria-label="Select language">
+          <button type="button" data-lang="en" aria-selected="true">EN</button>
+          <button type="button" data-lang="ar" aria-selected="false">AR</button>
+        </div>
+
+        <div class="mobile-nav__contact">
+          <a href="tel:+390551234567"><i class="bi bi-telephone-fill" aria-hidden="true"></i> +39 055 123 4567</a>
+          <a href="mailto:info@pitex-engineering.com"><i class="bi bi-envelope-fill" aria-hidden="true"></i>
+            info@pitex-engineering.com</a>
+        </div>
+
+        <ul class="mobile-nav__social" role="list">
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.linkedin" aria-label="PITEX on LinkedIn"><i class="bi bi-linkedin" aria-hidden="true"></i></a></li>
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.facebook" aria-label="PITEX on Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></a></li>
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.instagram" aria-label="PITEX on Instagram"><i class="bi bi-instagram" aria-hidden="true"></i></a></li>
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.youtube" aria-label="PITEX on YouTube"><i class="bi bi-youtube" aria-hidden="true"></i></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================================
+       PAGE BANNER (reusable component — see assets/css/page-banner.css
+       and assets/js/page-banner.js)
+       Compact internal-page intro: breadcrumb + title only, no headline,
+       no description, no CTA. Particles come from the site-wide
+       .ambient-particles system (style.css/main.js) — the same one every
+       other section already uses. The exact same .page-banner markup is
+       meant to be reused verbatim on every internal page — only the
+       breadcrumb trail, the title text and the background image below
+       change (see the component's own file header for the full list).
+       ========================================================= -->
+  <section class="page-banner about-hero ambient-particles" id="hero" data-particle-density="0.6" aria-labelledby="page-banner-title">
+
+    <div class="page-banner__bg" aria-hidden="true">
+      <img src="assets/images/insight-ai-pressing.jpg" alt="" loading="eager" />
+    </div>
+    <div class="page-banner__overlay" aria-hidden="true"></div>
+    <div class="page-banner__vignette" aria-hidden="true"></div>
+    <div class="page-banner__light" aria-hidden="true"></div>
+    <div class="page-banner__curve" aria-hidden="true"></div>
+
+    <div class="container-custom page-banner__inner">
+      <div class="page-banner__crumb glass-card-banner">
+        <nav class="breadcrumb-custom" aria-label="Breadcrumb">
+          <a href="index.html" data-i18n="common.nav.home">Home</a>
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          <span aria-current="page" data-i18n="common.nav.leadership">Leadership</span>
+        </nav>
+      </div>
+
+      <h1 class="page-banner__title" id="page-banner-title" data-i18n="pages.leadership.banner.title">Leadership</h1>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       MESSAGE FROM THE CEO
+       Reuses .about-grid/.about-media/.about-media__glow/
+       .about-media__frame/.about-media__overlay/.cert-card/.glass-card/
+       .about-content/.section-badge/.about-content__badge/.eyebrow/
+       .particle-field/.ambient-blob/.mv-section__blueprint and the
+       .gsap-fade-up/.gsap-slide-left/.gsap-scale-in/.gsap-stagger-item
+       entrance primitives wholesale — no new layout primitives. Image
+       hover (tilt/glow/overlay) and the badge's lift + magnetic pull
+       come for free via main.js's initImageInteraction()/initMagnetic(),
+       generalized to run on every .about-media/.cert-card on the page
+       (was previously wired to only the first). about.css adds only the
+       frosted-glass badge variant, quote typography and signature line;
+       about.js (initCeoSection) owns the entrance choreography, portrait
+       clip-path reveal, sentence stagger and signature stroke-draw.
+       ========================================================= -->
+  <section class="ceo-section section-padding bg-surface ambient-particles" id="ceo-message" data-particle-density="0.5" data-particle-managed="opacity" aria-labelledby="ceo-title">
+    <div class="mv-section__blueprint" aria-hidden="true"></div>
+    <div class="particle-field" id="ceoParticles" aria-hidden="true">
+      <div class="ambient-blob ceo-blob ceo-blob--one"></div>
+      <div class="ambient-blob ceo-blob ceo-blob--two"></div>
+    </div>
+
+    <div class="container-custom">
+      <h2 class="visually-hidden" id="ceo-title">Message From the CEO</h2>
+
+      <div class="about-grid">
+
+        <!-- Left: executive portrait -->
+        <figure class="about-media ceo-media gsap-slide-left m-0">
+          <div class="about-media__glow" aria-hidden="true"></div>
+          <div class="about-media__frame">
+            <div class="about-media__overlay" aria-hidden="true"></div>
+            <img src="assets/images/ceo-portrait.jpg"
+              alt="Portrait of Alessandro Ferretti, CEO and Chief Engineer of PITEX, at the PITEX production facility"
+              loading="lazy" width="834" height="1084" />
+          </div>
+
+          <div class="cert-card cert-card--ceo glass-card gsap-scale-in" role="note">
+            <div class="cert-card__icon" aria-hidden="true"><i class="bi bi-person-badge"></i></div>
+            <p class="eyebrow cert-card__eyebrow" data-i18n="pages.leadership.ceo.eyebrow">Chief Executive</p>
+            <p class="cert-card__title" data-i18n="pages.leadership.ceo.name">Alessandro Ferretti</p>
+            <p class="cert-card__text" data-i18n="pages.leadership.ceo.yearsLabel">30+ Years of Engineering Leadership</p>
+          </div>
+        </figure>
+
+        <!-- Right: message -->
+        <article class="about-content">
+          <span class="section-badge about-content__badge gsap-fade-up" data-i18n="pages.leadership.ceo.badge">Message From the CEO</span>
+          <span class="ceo-quote-mark gsap-scale-in" aria-hidden="true"><i class="bi bi-quote"></i></span>
+
+          <blockquote class="ceo-quote">
+            <p>
+              <span class="ceo-quote__sentence gsap-stagger-item" data-i18n="pages.leadership.ceo.quote1">&ldquo;We don&rsquo;t build machines.</span>
+              <span class="ceo-quote__sentence gsap-stagger-item" data-i18n="pages.leadership.ceo.quote2">We build the quiet certainty that every batch of
+                oil leaving our clients&rsquo; facilities will be as extraordinary as the harvest that produced
+                it.</span>
+              <span class="ceo-quote__sentence gsap-stagger-item"><em data-i18n="pages.leadership.ceo.quote3">That is the promise every PITEX engineer signs
+                  their name to.&rdquo;</em></span>
+            </p>
+
+            <footer class="ceo-signature">
+              <svg class="ceo-signature__line" viewBox="0 0 150 50" aria-hidden="true" focusable="false">
+                <path
+                  d="M2,35 C15,10 25,45 38,25 C50,8 60,42 72,22 C85,5 95,38 108,20 C118,8 128,30 146,15" />
+              </svg>
+              <div>
+                <cite class="ceo-signature__name" data-i18n="pages.leadership.ceo.name">Alessandro Ferretti</cite>
+                <p class="ceo-signature__role" data-i18n="pages.leadership.ceo.signatureRole">CEO &amp; Chief Engineer, PITEX</p>
+              </div>
+            </footer>
+          </blockquote>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =========================================================================
+       CHAIRMAN'S CORE VALUES
+       New, self-contained section — see the file header in leadership.css
+       for exactly what it reuses (tokens + .section-header/.ambient-blob/
+       .ambient-particles/.gsap-* primitives only) versus what is new
+       (the .value-card primitive itself, not shared with .mv-card,
+       .exec-card, or any other card on the site).
+       ========================================================================= -->
+  <section class="chairman-values section-padding bg-surface-alt ambient-particles" id="chairman-values"
+    data-particle-density="0.35" aria-labelledby="chairman-values-title">
+    <div class="chairman-values__radial" aria-hidden="true"></div>
+    <div class="chairman-values__blueprint" aria-hidden="true"></div>
+    <div class="ambient-blob chairman-blob chairman-blob--one" aria-hidden="true"></div>
+    <div class="ambient-blob chairman-blob chairman-blob--two" aria-hidden="true"></div>
+
+    <div class="container-custom">
+      <header class="section-header section-header--center">
+        <span class="section-badge" data-i18n="pages.leadership.values.badge">Our Philosophy</span>
+        <h2 class="section-title" id="chairman-values-title" data-i18n="pages.leadership.values.title">Chairman&rsquo;s Core Values</h2>
+        <p class="section-subtitle" data-i18n="pages.leadership.values.subtitle">These principles define how PITEX leads, innovates, and builds long-term
+          partnerships across the global olive oil industry.</p>
+      </header>
+
+      <div class="row g-4 g-lg-5 value-cards">
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <article class="value-card h-100">
+            <span class="value-card__number" aria-hidden="true">01</span>
+            <div class="value-card__icon" aria-hidden="true"><i class="bi bi-shield-check"></i></div>
+            <h3 class="value-card__title" data-i18n="pages.leadership.values.items.integrity.title">Integrity</h3>
+            <p class="value-card__text" data-i18n="pages.leadership.values.items.integrity.text">We build every relationship with honesty, transparency, and long-term
+              commitment.</p>
+            <span class="value-card__divider" aria-hidden="true"></span>
+            <span class="value-card__tag" data-i18n="pages.leadership.values.items.integrity.tag">Trust</span>
+          </article>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <article class="value-card h-100">
+            <span class="value-card__number" aria-hidden="true">02</span>
+            <div class="value-card__icon" aria-hidden="true"><i class="bi bi-gear-wide-connected"></i></div>
+            <h3 class="value-card__title" data-i18n="pages.leadership.values.items.engineering.title">Engineering Excellence</h3>
+            <p class="value-card__text" data-i18n="pages.leadership.values.items.engineering.text">Every solution reflects precision engineering and uncompromising
+              quality.</p>
+            <span class="value-card__divider" aria-hidden="true"></span>
+            <span class="value-card__tag" data-i18n="pages.leadership.values.items.engineering.tag">Quality First</span>
+          </article>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <article class="value-card h-100">
+            <span class="value-card__number" aria-hidden="true">03</span>
+            <div class="value-card__icon" aria-hidden="true"><i class="bi bi-lightbulb"></i></div>
+            <h3 class="value-card__title" data-i18n="pages.leadership.values.items.innovation.title">Innovation</h3>
+            <p class="value-card__text" data-i18n="pages.leadership.values.items.innovation.text">We continuously improve our technologies to deliver smarter production
+              systems.</p>
+            <span class="value-card__divider" aria-hidden="true"></span>
+            <span class="value-card__tag" data-i18n="pages.leadership.values.items.innovation.tag">Innovation</span>
+          </article>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <article class="value-card h-100">
+            <span class="value-card__number" aria-hidden="true">04</span>
+            <div class="value-card__icon" aria-hidden="true"><i class="bi bi-people"></i></div>
+            <h3 class="value-card__title" data-i18n="pages.leadership.values.items.customer.title">Customer Commitment</h3>
+            <p class="value-card__text" data-i18n="pages.leadership.values.items.customer.text">Our clients&rsquo; success drives every decision we make.</p>
+            <span class="value-card__divider" aria-hidden="true"></span>
+            <span class="value-card__tag" data-i18n="pages.leadership.values.items.customer.tag">Leadership</span>
+          </article>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <article class="value-card h-100">
+            <span class="value-card__number" aria-hidden="true">05</span>
+            <div class="value-card__icon" aria-hidden="true"><i class="bi bi-clipboard-check"></i></div>
+            <h3 class="value-card__title" data-i18n="pages.leadership.values.items.responsibility.title">Responsibility</h3>
+            <p class="value-card__text" data-i18n="pages.leadership.values.items.responsibility.text">We take full ownership of every project from planning to
+              commissioning.</p>
+            <span class="value-card__divider" aria-hidden="true"></span>
+            <span class="value-card__tag" data-i18n="pages.leadership.values.items.responsibility.tag">Responsibility</span>
+          </article>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+          <article class="value-card h-100">
+            <span class="value-card__number" aria-hidden="true">06</span>
+            <div class="value-card__icon" aria-hidden="true"><i class="bi bi-globe-americas"></i></div>
+            <h3 class="value-card__title" data-i18n="pages.leadership.values.items.global.title">Global Vision</h3>
+            <p class="value-card__text" data-i18n="pages.leadership.values.items.global.text">Building trusted partnerships across international markets with
+              sustainable growth.</p>
+            <span class="value-card__divider" aria-hidden="true"></span>
+            <span class="value-card__tag" data-i18n="pages.leadership.values.items.global.tag">Growth</span>
+          </article>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+<!-- =========================================================
+       COMPANY STATISTICS STRIP
+       Compact, single-row strip (no hero, no badge, no heading,
+       no cards) — a premium version of the reference banner.
+       Reuses .container-custom, .ambient-blob (+ its shared
+       blob-drift-a/b keyframes), .ambient-particles (auto particle
+       field, main.js), .visually-hidden and Manrope/800 number
+       typography (same convention as .case-study-stat__value).
+       Counters reuse the single site-wide [data-count-to] engine
+       (initCounters in main.js) — no page-local duplicate.
+       Entrance + hover glow/scale live in leadership.js
+       (initStatsStrip).
+       ========================================================= -->
+  <section class="stats-strip ambient-particles" id="stats" data-particle-density="0.3"
+    aria-label="Company statistics">
+    <div class="stats-strip__bg" aria-hidden="true">
+      <div class="stats-strip__blueprint"></div>
+      <div class="ambient-blob stats-blob stats-blob--olive"></div>
+      <div class="ambient-blob stats-blob stats-blob--blue"></div>
+      <div class="stats-strip__glow"></div>
+      <div class="stats-strip__vignette"></div>
+    </div>
+    <div class="stats-strip__sheen" aria-hidden="true"></div>
+
+    <div class="container-custom">
+      <ul class="stats-row" role="list">
+
+        <li role="listitem" class="stat-item">
+          <p class="stat-item__value">
+            <span data-count-to="25" data-suffix="+" aria-hidden="true">0+</span>
+            <span class="visually-hidden">25+</span>
+          </p>
+          <p class="stat-item__label" data-i18n="pages.leadership.stats.years">Years Experience</p>
+        </li>
+
+        <li role="listitem" class="stat-item">
+          <p class="stat-item__value">
+            <span data-count-to="100" data-suffix="+" aria-hidden="true">0+</span>
+            <span class="visually-hidden">100+</span>
+          </p>
+          <p class="stat-item__label" data-i18n="pages.leadership.stats.projects">Projects Delivered</p>
+        </li>
+
+        <li role="listitem" class="stat-item">
+          <p class="stat-item__value">
+            <span data-count-to="40" data-suffix="+" aria-hidden="true">0+</span>
+            <span class="visually-hidden">40+</span>
+          </p>
+          <p class="stat-item__label" data-i18n="pages.leadership.stats.countries">Countries Served</p>
+        </li>
+
+        <li role="listitem" class="stat-item">
+          <p class="stat-item__value">
+            <span data-count-to="500" data-suffix="+" aria-hidden="true">0+</span>
+            <span class="visually-hidden">500+</span>
+          </p>
+          <p class="stat-item__label" data-i18n="pages.leadership.stats.machines">Machines Installed</p>
+        </li>
+
+      </ul>
+    </div>
+  </section>
+
+
+
+
+<!-- =========================================================
+       TRUSTED PARTNERS SECTION — infinite logo marquee
+       ========================================================= -->
+  <section class="trusted-section section-padding bg-surface" id="trusted-partners"
+    aria-labelledby="trusted-partners-title">
+    <div class="trusted-blueprint" aria-hidden="true"></div>
+    <div class="trusted-lines" aria-hidden="true"></div>
+    <span class="trusted-glow-dot trusted-glow-dot--one" aria-hidden="true"></span>
+    <span class="trusted-glow-dot trusted-glow-dot--two" aria-hidden="true"></span>
+    <div class="particle-field" id="trustedParticles" aria-hidden="true">
+      <div class="ambient-blob ambient-blob--two"></div>
+      <div class="ambient-blob ambient-blob--one"></div>
+    </div>
+
+    <div class="container-custom">
+      <header class="section-header section-header--center">
+        <span class="section-badge" data-i18n="pages.home.trusted.badge">Trusted Worldwide</span>
+        <h2 class="section-title" id="trusted-partners-title" data-i18n="pages.home.trusted.title">Trusted by Industry Leaders Around the Globe</h2>
+      </header>
+    </div>
+
+    <div class="trusted-marquee" data-trusted-marquee role="region" aria-label="Companies that trust PITEX">
+      <div class="trusted-marquee__fade trusted-marquee__fade--left" aria-hidden="true"></div>
+      <div class="trusted-marquee__fade trusted-marquee__fade--right" aria-hidden="true"></div>
+
+      <div class="trusted-marquee__track" data-trusted-track id="trustedMarqueeTrack">
+        <!-- Populated at runtime from window.PITEX_PARTNERS
+             (assets/js/partners-data.js) by assets/js/trusted-marquee.js.
+             Two identical groups are rendered so the marquee can loop
+             seamlessly at the 50% mark (see trusted-marquee-scroll
+             keyframes in style.css). Each card renders ONLY the real
+             logo image -- no fabricated icon, no placeholder company name. -->
+      </div>
+    </div>
+  </section>
+
+
+
+
+
+
+  <!-- =========================================================
+       FOOTER (same component as index.html)
+       ========================================================= -->
+  <footer class="site-footer" id="site-footer">
+    <div class="footer-bg" aria-hidden="true">
+      <div class="footer-blueprint"></div>
+      <div class="particle-field" id="footerParticles"></div>
+      <div class="ambient-blob footer-blob footer-blob--one"></div>
+      <div class="ambient-blob footer-blob footer-blob--two"></div>
+      <div class="footer-glass-panel" aria-hidden="true"></div>
+    </div>
+
+    <div class="container-custom footer-inner">
+
+      <div class="row g-5 footer-top">
+
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="footer-brand">
+            <a href="index.html" class="footer-logo-link" aria-label="PITEX home">
+              <img src="assets/images/logo-white.png" alt="PITEX" class="footer-logo" width="150" height="107"
+                loading="lazy" />
+            </a>
+            <p class="footer-text footer-brand__desc" data-i18n="common.footer.brandDesc">Engineering premium olive oil production lines with four decades
+              of European precision and industrial excellence.</p>
+
+            <ul class="footer-social list-unstyled" role="list">
+              <li class="footer-social__item">
+                <a href="#" class="footer-social__link" data-i18n-attr-aria-label="common.footer.social.linkedin" aria-label="PITEX on LinkedIn"><i class="bi bi-linkedin"
+                    aria-hidden="true"></i></a>
+              </li>
+              <li class="footer-social__item">
+                <a href="#" class="footer-social__link" data-i18n-attr-aria-label="common.footer.social.facebook" aria-label="PITEX on Facebook"><i class="bi bi-facebook"
+                    aria-hidden="true"></i></a>
+              </li>
+              <li class="footer-social__item">
+                <a href="https://wa.me/390551234567" class="footer-social__link" target="_blank" rel="noopener" data-i18n-attr-aria-label="common.footer.social.whatsapp" aria-label="PITEX on WhatsApp"><i class="bi bi-whatsapp"
+                    aria-hidden="true"></i></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="footer-col">
+            <h3 class="footer-heading" data-i18n="common.footer.navHeading">Navigation</h3>
+            <ul class="footer-links list-unstyled" role="list">
+              <li class="footer-links__item"><a href="index.html#about" class="footer-link"><i
+                    class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span data-i18n="common.footer.links.home">Home</span></a></li>
+              <li class="footer-links__item"><a href="about.html" class="footer-link"><i
+                    class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span data-i18n="common.footer.links.about">Our Story</span></a></li>
+              <li class="footer-links__item"><a href="index.html#machinery" class="footer-link"><i
+                    class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span data-i18n="common.footer.links.solutions">Solutions</span></a>
+              </li>
+              <li class="footer-links__item"><a href="production-lines.html" class="footer-link"><i
+                    class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span>Production
+                    Lines</span></a></li>
+              <li class="footer-links__item"><a href="index.html#case-studies" class="footer-link"><i
+                    class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span data-i18n="common.footer.links.caseStudies">Case
+                    Studies</span></a></li>
+              <li class="footer-links__item"><a href="index.html#contact" class="footer-link"><i
+                    class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span data-i18n="common.footer.links.contact">Contact</span></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="footer-col">
+            <h3 class="footer-heading" data-i18n="common.footer.hqHeading">Headquarters</h3>
+            <ul class="footer-contact-list list-unstyled" role="list">
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-geo-alt-fill"></i></span>
+                <span class="footer-text footer-contact-text" data-i18n="common.footer.address" data-i18n-html="true">Via dell'Industria, 12<br>Firenze, Italy</span>
+              </li>
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-telephone-fill"></i></span>
+                <a href="tel:+390551234567" class="footer-text footer-contact-text footer-contact-text--link">+39 055
+                  123 4567</a>
+              </li>
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-envelope-fill"></i></span>
+                <a href="mailto:info@pitex-engineering.com"
+                  class="footer-text footer-contact-text footer-contact-text--link">info@pitex-engineering.com</a>
+              </li>
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-clock-fill"></i></span>
+                <span class="footer-text footer-contact-text" data-i18n="common.footer.hours">Mon – Fri, 8:00 – 18:00 CET</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="footer-col">
+            <h3 class="footer-heading" data-i18n="common.footer.locationHeading">Our Location</h3>
+            <div class="footer-map-frame">
+              <iframe
+                src="https://maps.google.com/maps?q=Via%20dell'Industria%2012%2C%20Firenze%2C%20Italy&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                title="PITEX facility location on Google Maps"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                aria-label="Map showing the PITEX facility in Firenze, Italy"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copy" data-i18n="common.footer.copyright">© 2026 PITEX. All Rights Reserved.</p>
+        <nav class="footer-legal" aria-label="Legal">
+          <a href="#" class="footer-legal-link" data-i18n="common.footer.privacy">Privacy Policy</a>
+          <a href="#" class="footer-legal-link" data-i18n="common.footer.terms">Terms &amp; Conditions</a>
+          <a href="#" class="footer-legal-link" data-i18n="common.footer.cookies">Cookie Policy</a>
+        </nav>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Back To Top -->
+  <button type="button" id="backToTop" class="back-to-top" aria-label="Back to top"
+    data-i18n-attr-aria-label="common.aria.backToTop">
+    <svg class="back-to-top__ring" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+      <circle class="back-to-top__ring-track" cx="24" cy="24" r="21"></circle>
+      <circle class="back-to-top__ring-fill" cx="24" cy="24" r="21"></circle>
+    </svg>
+    <i class="bi bi-arrow-up back-to-top__icon" aria-hidden="true"></i>
+  </button>
+
+  <!-- Libraries -->
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+
+  <!-- App -->
+  <!-- Localization (i18n) engine — lang-inline-data.js already loaded in
+       <head> (see EARLY LANGUAGE INIT). These must still load before any
+       script that renders translatable text. -->
+  <script defer src="assets/js/i18n-utils.js"></script>
+  <script defer src="assets/js/translator.js"></script>
+  <script defer src="assets/js/language.js"></script>
+
+<script defer src="assets/js/partners-data.js"></script>
+<script defer src="assets/js/trusted-marquee.js"></script>
+<script defer src="assets/js/main.js?v=versionD-insights-contact"></script>
+  <script defer src="assets/js/header.js"></script>
+  <script defer src="assets/js/leadership.js?v=4"></script>
+  <script defer src="assets/js/page-banner.js"></script>
+</body>
+</html>

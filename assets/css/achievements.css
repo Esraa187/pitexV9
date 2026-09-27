@@ -1,0 +1,201 @@
+/* =========================================================================
+   PITEX — achievements.css
+   "Company Statistics / Achievements" section, dropped between the hero
+   and the About section. Reuses --primary/--shadow/--radius tokens,
+   .section-badge/.section-title/.section-subtitle, .particle-field +
+   .ambient-blob, .card-sweep, and the global stat-glow keyframe (style.css)
+   — nothing here re-declares a primitive that already exists elsewhere.
+
+   NOTE ON MOTION OWNERSHIP (same split used throughout the project):
+   continuous idle motion (icon float) and hover transform (card lift,
+   icon rotate) are GSAP-owned in achievements.js. CSS below only owns
+   static layout and non-transform hover affordances — box-shadow,
+   border-color, background, opacity, and the accent line's width.
+   ========================================================================= */
+
+.achievements-section {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ---------- Decorative background layer ---------- */
+.achievements-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.achievements-blueprint {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image:
+    linear-gradient(rgba(var(--primary-rgb), 0.9) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--primary-rgb), 0.9) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 40%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 40%, transparent 90%);
+}
+
+.achievements-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--primary-rgb), 0.12);
+}
+.achievements-ring--one {
+  width: 340px;
+  height: 340px;
+  top: -12%;
+  right: 4%;
+}
+.achievements-ring--two {
+  width: 200px;
+  height: 200px;
+  bottom: -8%;
+  left: 6%;
+  border-color: rgba(var(--primary-rgb), 0.16);
+}
+
+.achievements-section .ambient-blob { opacity: 0.2; }
+
+/* ---------- Header badge tweak ---------- */
+.achievements-badge { margin-inline: auto; }
+
+/* ---------- Stats grid ---------- */
+.achievements-grid {
+  position: relative;
+  z-index: 1;
+  margin-top: clamp(2.5rem, 4vw, 4rem);
+}
+
+/* ---------- Achievement card ----------
+   Premium industrial card: soft glassy gradient, thin border, large
+   radius. Never looks like a stock Bootstrap card. */
+.achievement-card {
+  position: relative;
+  height: 100%;
+  padding: clamp(2rem, 1.6rem + 1.6vw, 2.75rem) 1.5rem 2.1rem;
+  text-align: center;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    linear-gradient(165deg, rgba(var(--primary-rgb), 0.05) 0%, rgba(255, 255, 255, 0.9) 38%),
+    var(--bg);
+  border: 1px solid rgba(var(--primary-rgb), 0.12);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  will-change: transform;
+  transition: box-shadow 1s var(--ease-premium), border-color 1s var(--ease-premium), background 1s ease;
+}
+
+.achievement-card::after {
+  /* border highlight, brightened on hover */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb), 0);
+  pointer-events: none;
+  z-index: 3;
+  transition: box-shadow 1s ease;
+}
+
+.achievement-card:hover {
+  border-color: rgba(var(--primary-rgb), 0.28);
+  box-shadow: 0 30px 60px -12px rgba(var(--primary-rgb), 0.28), var(--shadow);
+  background:
+    linear-gradient(165deg, rgba(var(--primary-rgb), 0.09) 0%, rgba(255, 255, 255, 0.95) 42%),
+    var(--bg);
+}
+.achievement-card:hover::after {
+  box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb), 0.35);
+}
+
+/* Diagonal light sweep — same recipe as .card-sweep elsewhere in the
+   project (style.css); only the hover trigger needs re-declaring. */
+.achievement-card:hover .card-sweep {
+  opacity: 1;
+  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+  transform: translateX(280%) rotate(10deg);
+}
+
+/* ---------- Icon ---------- */
+.achievement-icon {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.6rem;
+  color: var(--primary);
+  background: radial-gradient(circle at 32% 28%, rgba(var(--primary-rgb), 0.16), rgba(var(--primary-rgb), 0.06) 70%);
+  box-shadow: 0 0 0 1px rgba(var(--primary-rgb), 0.14), 0 12px 26px -10px rgba(var(--primary-rgb), 0.35);
+  position: relative;
+  z-index: 1;
+  transition: box-shadow 0.9s ease, background 0.9s ease;
+}
+.achievement-card:hover .achievement-icon {
+  background: radial-gradient(circle at 32% 28%, rgba(var(--primary-rgb), 0.26), rgba(var(--primary-rgb), 0.1) 70%);
+  box-shadow: 0 0 0 1px rgba(var(--primary-rgb), 0.24), 0 18px 34px -10px rgba(var(--primary-rgb), 0.5);
+}
+
+/* ---------- Number + label ---------- */
+.achievement-value {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.1rem, 1.7rem + 1.4vw, 2.75rem);
+  line-height: 1;
+  color: var(--secondary);
+  position: relative;
+  z-index: 1;
+}
+.achievement-value span[data-count-to].is-counted { animation: stat-glow 0.9s ease; }
+
+.achievement-label {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Accent line ----------
+   Width, not transform, so it's a pure CSS hover affordance — same
+   convention as .link-arrow--light's underline in utilities.css. */
+.achievement-accent {
+  display: block;
+  width: 32px;
+  height: 3px;
+  margin: 1.1rem auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--primary-light), var(--primary));
+  position: relative;
+  z-index: 1;
+  transition: width 0.8s var(--ease-premium);
+}
+.achievement-card:hover .achievement-accent { width: 64px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 767.98px) {
+  .achievements-ring--one { width: 220px; height: 220px; }
+  .achievements-ring--two { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .achievement-card,
+  .achievement-icon,
+  .achievement-accent {
+    transition-duration: 0.001ms;
+  }
+}

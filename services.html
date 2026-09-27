@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- =====================================================================
+       EARLY LANGUAGE INIT (must stay first in <head>, before any CSS/JS
+       that isn't itself part of this block) — fixes the Arabic/English
+       FOUC (flash of untranslated content) on page load and navigation.
+
+       Runs synchronously, before the browser paints anything:
+         1. Reads the saved language from localStorage (same key
+            language.js uses) and sets <html lang dir> immediately, so
+            layout direction is correct from the very first pixel.
+         2. Hides <body> (visibility, not display — no layout shift) via
+            the inline <style> right below, so *even the static English
+            text already sitting in the HTML* never becomes visible
+            before translator.js overwrites it.
+         3. language.js removes the 'i18n-boot' class the moment its
+            first translateElement() pass finishes (typically a
+            fraction of a millisecond after DOMContentLoaded, since the
+            dictionary is preloaded synchronously via lang-inline-data.js
+            just below — no network fetch is on the critical path).
+         4. The setTimeout below is only a safety net in case JS fails
+            to load/execute for some reason — the page reveals itself
+            after 1.5s no matter what, so a script error never leaves
+            a permanently blank page.
+       ===================================================================== -->
+  <script>
+    (function () {
+      var STORAGE_KEY = 'pitex_lang'; // must match language.js
+      var SUPPORTED = ['en', 'ar'];
+      var RTL = ['ar'];
+      var saved = null;
+      try { saved = window.localStorage.getItem(STORAGE_KEY); } catch (e) {}
+      var browserLang = (navigator.language || '').slice(0, 2);
+      var lang = (saved && SUPPORTED.indexOf(saved) !== -1 && saved) ||
+        (SUPPORTED.indexOf(browserLang) !== -1 && browserLang) ||
+        'en';
+      var html = document.documentElement;
+      html.setAttribute('lang', lang);
+      html.setAttribute('dir', RTL.indexOf(lang) !== -1 ? 'rtl' : 'ltr');
+      html.classList.add('i18n-boot');
+      window.__PITEX_INITIAL_LANG__ = lang;
+      window.__PITEX_I18N_TIMEOUT__ = setTimeout(function () {
+        html.classList.remove('i18n-boot');
+      }, 1500);
+    })();
+  </script>
+  <style>
+    /* Paired with the script above: keeps the page invisible only for the
+       brief window between "HTML parsed" and "first translate pass done".
+       visibility (not display) is used so no element ever changes size or
+       position when the class is removed - zero layout shift. */
+    html.i18n-boot body { visibility: hidden; opacity: 0; }
+    body { transition: opacity .15s ease; }
+  </style>
+  <noscript>
+    <style>html.i18n-boot body { visibility: visible; opacity: 1; }</style>
+  </noscript>
+
+  <!-- Embedded EN/AR dictionaries, loaded synchronously (no `defer`) so
+       they're sitting in memory before <body> is even parsed - the first
+       translateElement() pass never has to wait on a network fetch. -->
+  <script src="assets/js/lang-inline-data.js"></script>
+  <title>Services | PITEX Olive Oil Manufacturing</title>
+  <meta name="description" content="From first consultation to 24/7 lifecycle support, PITEX delivers turnkey engineering services for industrial olive oil producers." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Almarai:wght@300;400;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap grid only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Lenis (buttery smooth scroll) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.css">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="assets/css/utilities.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/header.css">
+  <link rel="stylesheet" href="assets/css/animations.css">
+  <link rel="stylesheet" href="assets/css/page-banner.css">
+  <!-- Page-specific additions (hero layout, floating cards, stat row) -->
+  <link rel="stylesheet" href="assets/css/services.css">
+  <!-- Page-specific addition: Customer Success & Case Studies section -->
+  <link rel="stylesheet" href="assets/css/success.css">
+  <link rel="stylesheet" href="assets/css/rtl.css">
+</head>
+<body>
+
+   <!-- =========================================================
+       HEADER / PRIMARY NAVIGATION
+       ========================================================= -->
+  <header class="site-header" id="siteHeader" data-header>
+    <div class="container site-header__inner">
+
+      <nav class="site-header__nav--primary" aria-label="Primary">
+        <ul class="site-header__list">
+
+          <li class="site-header__item">
+            <a href="index.html" class="site-header__link" data-nav-link data-section="about">
+              <span data-i18n="common.nav.home">Home</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+
+          <li class="site-header__item site-header__item--has-mega" data-mega-item>
+            <button type="button" class="site-header__link site-header__link--trigger" aria-haspopup="true"
+              aria-expanded="false" aria-controls="companyMenu" data-section="features" data-mega-trigger>
+              <span data-i18n="common.nav.company">Company</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+              <i class="bi bi-chevron-down site-header__chevron" aria-hidden="true"></i>
+            </button>
+
+            <div class="mega-menu mega-menu--dropdown glass-card" id="companyMenu" data-mega-panel role="menu"
+              aria-label="Company">
+              <div class="mega-menu__grid">
+                <a href="about.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.about">Our Story</span>
+                  </span>
+                </a>
+                <a href="leadership.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.leadership">Leadership</span>
+                  </span>
+                </a>
+                <a href="certificates.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.certificates">Certificates</span>
+                  </span>
+                </a>
+                <a href="success-partners.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.successPartners">Success Partners</span>
+                  </span>
+                </a>
+                <a href="careers.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.career">Career</span>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </li>
+
+          <li class="site-header__item">
+            <a href="services.html" class="site-header__link is-active" data-nav-link>
+              <span data-i18n="common.nav.services">Services</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+
+          <li class="site-header__item site-header__item--has-mega" data-mega-item>
+            <a href="production-lines.html" id="navProductionLines" class="site-header__link site-header__link--trigger"
+              data-nav-link data-mega-link data-section="about">
+              <span data-i18n="common.nav.productionLines">Production Lines</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+            <button type="button" class="site-header__mega-toggle" aria-haspopup="true" aria-expanded="false"
+              aria-controls="productionLinesMenu" aria-label="Show Production Lines menu" data-mega-trigger>
+              <i class="bi bi-chevron-down site-header__chevron" aria-hidden="true"></i>
+            </button>
+
+            <div class="mega-menu mega-menu--dropdown mega-menu--wide glass-card" id="productionLinesMenu" data-mega-panel role="menu"
+              aria-label="Production Lines">
+              <div class="mega-menu__grid">
+                <a href="products.html?category=pitting-slicing-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.pittingSlicing">Pitting &amp; Slicing Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=olive-grading-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.oliveGrading">Olive Grading Line (Standard Olive Sizing)</span>
+                  </span>
+                </a>
+                <a href="products.html?category=filling-pasteurization-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.fillingPasteurization">Filling &amp; Pasteurization Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=roasting-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.roasting">Roasting Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=pepper-cucumber-perforation-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.pepperCucumber">Pepper &amp; Cucumber Perforation Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=pickle-mixing-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.pickleMixing">Pickle Mixing Line</span>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </li>
+
+          <li class="site-header__item">
+            <a href="gallary.html" class="site-header__link" data-nav-link>
+              <span data-i18n="common.nav.gallery">Gallery</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+
+          <li class="site-header__item">
+            <a href="contact.html" class="site-header__link" data-nav-link data-section="contact">
+              <span data-i18n="common.nav.contact">Contact Us</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <a href="#" class="site-header__logo" aria-label="PITEX home" data-header-logo>
+        <img src="assets/images/pitex-logo.png" alt="PITEX" loading="eager" decoding="async" />
+      </a>
+
+      <div class="site-header__actions">
+
+        <div class="lang-switch" data-lang-switch>
+          <button type="button" class="lang-switch__trigger" aria-haspopup="listbox" aria-expanded="false"
+            data-lang-trigger>
+            <i class="bi bi-globe2 lang-switch__icon" aria-hidden="true"></i>
+            <span data-lang-current>EN</span>
+          </button>
+          <ul class="lang-switch__menu" role="listbox" data-i18n-attr-aria-label="common.langSwitch.selectLanguage" aria-label="Select language" data-lang-menu>
+            <li role="option" aria-selected="true"><button type="button" data-lang="en">English</button></li>
+            <li role="option" aria-selected="false"><button type="button" data-lang="ar">العربية</button></li>
+          </ul>
+        </div>
+
+        <button type="button" class="btn-primary-custom site-header__cta" data-header-cta>
+          <span data-i18n="common.header.requestQuote">Request Quote</span>
+          <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+        </button>
+
+        <button type="button" class="hamburger" data-i18n-attr-aria-label="common.header.openMenu" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav"
+          data-hamburger>
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MOBILE FULLSCREEN OFFCANVAS NAVIGATION -->
+  <div class="mobile-nav" id="mobileNav" data-mobile-nav aria-hidden="true">
+    <div class="mobile-nav__backdrop" data-mobile-backdrop></div>
+
+    <div class="mobile-nav__panel" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+      <div class="mobile-nav__top">
+        <a href="#" class="mobile-nav__logo" aria-label="PITEX home">
+          <img src="assets/images/pitex-logo.png" alt="PITEX" width="480" height="345" loading="lazy" />
+        </a>
+        <button type="button" class="mobile-nav__close" aria-label="Close menu" data-mobile-close>
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <nav class="mobile-nav__links" aria-label="Mobile primary">
+        <a href="index.html" class="mobile-nav__link" data-mobile-link style="--i:0" data-i18n="common.nav.home">Home</a>
+
+        <div class="mobile-nav__group" data-mobile-group>
+          <button type="button" class="mobile-nav__link mobile-nav__toggle" data-mobile-toggle
+            aria-expanded="false" aria-controls="mobileCompanyMenu" style="--i:1">
+            <span data-i18n="common.nav.company">Company</span>
+            <i class="bi bi-chevron-down mobile-nav__toggle-chevron" aria-hidden="true"></i>
+          </button>
+          <div class="mobile-nav__submenu-wrap" id="mobileCompanyMenu" data-mobile-submenu>
+            <div class="mobile-nav__submenu">
+              <a href="about.html" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.about">Our Story</a>
+              <a href="leadership.html" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.leadership">Leadership</a>
+              <a href="certificates.html" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.certificates">Certificates</a>
+              <a href="success-partners.html" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.successPartners">Success Partners</a>
+              <a href="careers.html" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.career">Career</a>
+            </div>
+          </div>
+        </div>
+
+        <a href="services.html" class="mobile-nav__link is-active" data-mobile-link style="--i:2" data-i18n="common.nav.services">Services</a>
+
+        <div class="mobile-nav__group" data-mobile-group>
+          <div class="mobile-nav__group-row">
+            <a href="production-lines.html" id="navProductionLinesMobile" class="mobile-nav__link" data-mobile-link style="--i:3" data-i18n="common.nav.productionLines">Production Lines</a>
+            <button type="button" class="mobile-nav__toggle-btn" data-mobile-toggle
+              aria-expanded="false" aria-controls="mobileProductionLinesMenu" aria-label="Show Production Lines menu" style="--i:3">
+              <i class="bi bi-chevron-down mobile-nav__toggle-chevron" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="mobile-nav__submenu-wrap" id="mobileProductionLinesMenu" data-mobile-submenu>
+            <div class="mobile-nav__submenu">
+              <a href="products.html?category=pitting-slicing-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.pittingSlicing">Pitting &amp; Slicing Line</a>
+              <a href="products.html?category=olive-grading-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.oliveGrading">Olive Grading Line (Standard Olive Sizing)</a>
+              <a href="products.html?category=filling-pasteurization-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.fillingPasteurization">Filling &amp; Pasteurization Line</a>
+              <a href="products.html?category=roasting-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.roasting">Roasting Line</a>
+              <a href="products.html?category=pepper-cucumber-perforation-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.pepperCucumber">Pepper &amp; Cucumber Perforation Line</a>
+              <a href="products.html?category=pickle-mixing-line" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.categories.pickleMixing">Pickle Mixing Line</a>
+            </div>
+          </div>
+        </div>
+
+        <a href="gallary.html" class="mobile-nav__link" data-mobile-link style="--i:4" data-i18n="common.nav.gallery">Gallery</a>
+        <a href="contact.html" class="mobile-nav__link" data-mobile-link style="--i:5" data-i18n="common.nav.contact">Contact Us</a>
+      </nav>
+
+      <div class="mobile-nav__bottom">
+        <button type="button" class="btn-primary-custom mobile-nav__cta">
+          <span data-i18n="common.header.requestQuote">Request Quote</span>
+          <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+        </button>
+
+        <div class="mobile-nav__lang" role="group" data-i18n-attr-aria-label="common.langSwitch.selectLanguage" aria-label="Select language">
+          <button type="button" data-lang="en" aria-selected="true">EN</button>
+          <button type="button" data-lang="ar" aria-selected="false">AR</button>
+        </div>
+
+        <div class="mobile-nav__contact">
+          <a href="tel:+390551234567"><i class="bi bi-telephone-fill" aria-hidden="true"></i> +39 055 123 4567</a>
+          <a href="mailto:info@pitex-engineering.com"><i class="bi bi-envelope-fill" aria-hidden="true"></i>
+            info@pitex-engineering.com</a>
+        </div>
+
+        <ul class="mobile-nav__social" role="list">
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.linkedin" aria-label="PITEX on LinkedIn"><i class="bi bi-linkedin" aria-hidden="true"></i></a></li>
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.facebook" aria-label="PITEX on Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></a></li>
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.instagram" aria-label="PITEX on Instagram"><i class="bi bi-instagram" aria-hidden="true"></i></a></li>
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.youtube" aria-label="PITEX on YouTube"><i class="bi bi-youtube" aria-hidden="true"></i></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+   <!-- =========================================================
+       PAGE BANNER — reused verbatim from the shared component
+       (assets/css/page-banner.css + assets/js/page-banner.js).
+       Only the breadcrumb, title, subtitle and background image
+       change; entrance choreography (bg zoom-out, crumb fade,
+       title split-word reveal, subtitle fade, parallax on scroll)
+       is already wired generically by page-banner.js.
+       ========================================================= -->
+  <section class="page-banner careers-hero ambient-particles" id="hero" data-particle-density="0.6" aria-labelledby="page-banner-title" style="background-color:#f8fafc;">
+
+    <div class="page-banner__bg" aria-hidden="true">
+      <img src="assets/images/gallery-4-CfPOtq65.jpg" alt="" loading="eager" />
+    </div>
+    <div class="page-banner__overlay-2" aria-hidden="true"></div>
+    <div class="page-banner__vignette" aria-hidden="true"></div>
+    <div class="page-banner__light" aria-hidden="true"></div>
+    <div class="page-banner__curve" aria-hidden="true"></div>
+
+    <div class="container-custom page-banner__inner">
+      <div class="page-banner__crumb glass-card-banner">
+        <nav class="breadcrumb-custom" aria-label="Breadcrumb">
+          <a href="index.html" data-i18n="common.nav.home">Home</a>
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          <span aria-current="page" data-i18n="common.nav.services">Services</span>
+        </nav>
+      </div>
+
+      <h1 class="page-banner__title" id="page-banner-title" data-i18n="pages.services.banner.title" data-i18n-html="true">Our </h1>
+      
+    </div>
+  </section>
+
+
+
+  <!-- =========================================================
+       SERVICES OVERVIEW GRID
+       ========================================================= -->
+  <section class="services-grid section-padding  ambient-particles" data-particle-density="0.6" id="services-grid" aria-labelledby="services-grid-title" style="background-color:#f8fafc;">
+    <div class="trusted-blueprint" aria-hidden="true"></div>
+  
+
+    <div class="container-custom">
+
+      <div class="section-header section-header--center services-grid__header">
+        <span class="section-badge gsap-fade-up" data-i18n="pages.services.grid.badge">What We Deliver</span>
+        <h2 class="section-title gsap-fade-up" id="services-grid-title" data-i18n="pages.services.grid.title">
+          Six services. One integrated lifecycle.
+        </h2>
+        <p class="section-description gsap-fade-up" data-i18n="pages.services.grid.desc">
+          Every PITEX engagement is engineered end-to-end — from first blueprint to decades of aftercare — so nothing ever falls between the cracks.
+        </p>
+      </div>
+
+      <div class="row g-4 services-grid__row">
+
+        <div class="col-lg-4 col-md-6">
+          <article class="card service-tile h-100">
+            <span class="service-tile__accent" aria-hidden="true"></span>
+            <span class="service-tile__badge">
+              <span class="service-tile__badge-dot" aria-hidden="true"></span>
+              <span data-i18n="pages.services.grid.items.installation.tag">On-site</span>
+            </span>
+            <span class="card-icon service-tile__icon" aria-hidden="true"><i class="bi bi-tools"></i></span>
+            <h3 class="card-title" data-i18n="pages.services.grid.items.installation.title">Installation</h3>
+            <p class="card-text" data-i18n="pages.services.grid.items.installation.text">Turnkey mechanical and electrical installation of complete olive oil lines, executed on schedule by our certified field teams.</p>
+           
+          </article>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+          <article class="card service-tile h-100">
+            <span class="service-tile__accent" aria-hidden="true"></span>
+            <span class="service-tile__badge">
+              <span class="service-tile__badge-dot" aria-hidden="true"></span>
+              <span data-i18n="pages.services.grid.items.maintenance.tag">Planned</span>
+            </span>
+            <span class="card-icon service-tile__icon" aria-hidden="true"><i class="bi bi-sliders"></i></span>
+            <h3 class="card-title" data-i18n="pages.services.grid.items.maintenance.title">Maintenance</h3>
+            <p class="card-text" data-i18n="pages.services.grid.items.maintenance.text">Preventive and predictive maintenance programs that keep every centrifuge, decanter and press in specification.</p>
+           
+          </article>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+          <article class="card service-tile h-100">
+            <span class="service-tile__accent" aria-hidden="true"></span>
+            <span class="service-tile__badge">
+              <span class="service-tile__badge-dot" aria-hidden="true"></span>
+              <span data-i18n="pages.services.grid.items.consulting.tag">Advisory</span>
+            </span>
+            <span class="card-icon service-tile__icon" aria-hidden="true"><i class="bi bi-lightbulb"></i></span>
+            <h3 class="card-title" data-i18n="pages.services.grid.items.consulting.title">Consulting</h3>
+            <p class="card-text" data-i18n="pages.services.grid.items.consulting.text">Process engineering, feasibility studies and yield optimization from a team with 30+ years in oil extraction.</p>
+           
+          </article>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+          <article class="card service-tile h-100">
+            <span class="service-tile__accent" aria-hidden="true"></span>
+            <span class="service-tile__badge">
+              <span class="service-tile__badge-dot" aria-hidden="true"></span>
+              <span data-i18n="pages.services.grid.items.training.tag">Certified</span>
+            </span>
+            <span class="card-icon service-tile__icon" aria-hidden="true"><i class="bi bi-mortarboard-fill"></i></span>
+            <h3 class="card-title" data-i18n="pages.services.grid.items.training.title">Training</h3>
+            <p class="card-text" data-i18n="pages.services.grid.items.training.text">Structured operator and maintenance training — on-site or at our academy — with formal PITEX certification.</p>
+           
+          </article>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+          <article class="card service-tile h-100">
+            <span class="service-tile__accent" aria-hidden="true"></span>
+            <span class="service-tile__badge">
+              <span class="service-tile__badge-dot" aria-hidden="true"></span>
+              <span data-i18n="pages.services.grid.items.commissioning.tag">Validated</span>
+            </span>
+            <span class="card-icon service-tile__icon" aria-hidden="true"><i class="bi bi-clipboard-check"></i></span>
+            <h3 class="card-title" data-i18n="pages.services.grid.items.commissioning.title">Commissioning</h3>
+            <p class="card-text" data-i18n="pages.services.grid.items.commissioning.text">Cold and hot commissioning, SAT/FAT protocols, and formal handover documentation for full traceability.</p>
+            
+          </article>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+          <article class="card service-tile h-100">
+            <span class="service-tile__accent" aria-hidden="true"></span>
+            <span class="service-tile__badge">
+              <span class="service-tile__badge-dot" aria-hidden="true"></span>
+              <span data-i18n="pages.services.grid.items.support.tag">24/7</span>
+            </span>
+            <span class="card-icon service-tile__icon" aria-hidden="true"><i class="bi bi-headset"></i></span>
+            <h3 class="card-title" data-i18n="pages.services.grid.items.support.title">After-Sales Support</h3>
+            <p class="card-text" data-i18n="pages.services.grid.items.support.text">24/7 remote diagnostics, guaranteed spare parts availability and rapid field intervention worldwide.</p>
+            
+          </article>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+ <!-- =========================================================
+       CALL TO ACTION
+       Existing final-cta component, reused verbatim.
+       ========================================================= -->
+  <section class="final-cta-section section-padding bg-surface" id="final-cta" aria-labelledby="final-cta-title">
+    <div class="container-custom">
+      <div class="final-cta-card">
+        <div class="final-cta-bg" aria-hidden="true">
+          <div class="final-cta-blueprint"></div>
+          <div class="particle-field" id="finalCtaParticles"></div>
+          <div class="ambient-blob final-cta-blob final-cta-blob--one"></div>
+          <div class="ambient-blob final-cta-blob final-cta-blob--two"></div>
+          <div class="final-cta-glow"></div>
+          <i class="bi bi-gear-fill final-cta-gear"></i>
+        </div>
+
+        <div class="final-cta-inner">
+          <span class="section-badge section-badge--light" data-i18n="pages.gallery.finalCta.badge">Let's Build Together</span>
+          <h2 class="section-title section-title--light final-cta-title" id="final-cta-title" data-i18n="pages.gallery.finalCta.title">See Your Own Project
+            in This Gallery.</h2>
+          <p class="section-subtitle section-subtitle--light final-cta-desc" data-i18n="pages.gallery.finalCta.desc">Talk to our engineers about a
+            production line built around your grove, your volume, and your timeline.</p>
+
+          <div class="final-cta-actions">
+            <a href="index.html#contact" class="btn-light-custom">
+              <span data-i18n="common.buttons.contactUs">Contact Us</span>
+              <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+            </a>
+            <a href="production-lines.html" class="btn-glass-custom">
+              <span data-i18n="pages.gallery.finalCta.viewProductionLines">View Production Lines</span>
+              <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       FOOTER (same component as index.html)
+       ========================================================= -->
+  <footer class="site-footer" id="site-footer">
+    <div class="footer-bg" aria-hidden="true">
+      <div class="footer-blueprint"></div>
+      <div class="particle-field" id="footerParticles"></div>
+      <div class="ambient-blob footer-blob footer-blob--one"></div>
+      <div class="ambient-blob footer-blob footer-blob--two"></div>
+      <div class="footer-glass-panel" aria-hidden="true"></div>
+    </div>
+
+    <div class="container-custom footer-inner">
+
+      <div class="row g-5 footer-top">
+
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="footer-brand">
+            <a href="index.html" class="footer-logo-link" aria-label="PITEX home">
+              <img
+                src="assets/images/logo-white.png"
+                alt="PITEX"
+                class="footer-logo"
+                width="150" height="107"
+                loading="lazy"
+              />
+            </a>
+            <p class="footer-text footer-brand__desc" data-i18n="common.footer.brandDesc">Engineering premium olive oil production lines with four decades of European precision and industrial excellence.</p>
+
+            <ul class="footer-social list-unstyled" role="list">
+              <li class="footer-social__item">
+                <a href="#" class="footer-social__link" data-i18n-attr-aria-label="common.footer.social.linkedin" aria-label="PITEX on LinkedIn"><i class="bi bi-linkedin" aria-hidden="true"></i></a>
+              </li>
+              <li class="footer-social__item">
+                <a href="#" class="footer-social__link" data-i18n-attr-aria-label="common.footer.social.facebook" aria-label="PITEX on Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></a>
+              </li>
+              <li class="footer-social__item">
+                <a href="https://wa.me/390551234567" class="footer-social__link" target="_blank" rel="noopener" data-i18n-attr-aria-label="common.footer.social.whatsapp" aria-label="PITEX on WhatsApp"><i class="bi bi-whatsapp" aria-hidden="true"></i></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="footer-col">
+            <h3 class="footer-heading" data-i18n="common.footer.navHeading">Navigation</h3>
+            <ul class="footer-links list-unstyled" role="list">
+              <li class="footer-links__item"><a href="index.html#about" class="footer-link"><i class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span data-i18n="common.footer.links.home">Home</span></a></li>
+              <li class="footer-links__item"><a href="index.html#features" class="footer-link"><i class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span data-i18n="common.footer.links.about">Our Story</span></a></li>
+              <li class="footer-links__item"><a href="index.html#machinery" class="footer-link"><i class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span data-i18n="common.footer.links.solutions">Solutions</span></a></li>
+              <li class="footer-links__item"><a href="production-lines.html" class="footer-link"><i class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span data-i18n="common.footer.links.productionLines">Production Lines</span></a></li>
+              <li class="footer-links__item"><a href="services.html" class="footer-link"><i class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span data-i18n="common.footer.links.services">Services</span></a></li>
+              <li class="footer-links__item"><a href="index.html#contact" class="footer-link"><i class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span data-i18n="common.footer.links.contact">Contact</span></a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="footer-col">
+            <h3 class="footer-heading" data-i18n="common.footer.hqHeading">Headquarters</h3>
+            <ul class="footer-contact-list list-unstyled" role="list">
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-geo-alt-fill"></i></span>
+                <span class="footer-text footer-contact-text" data-i18n="common.footer.address" data-i18n-html="true">Via dell'Industria, 12<br>Firenze, Italy</span>
+              </li>
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-telephone-fill"></i></span>
+                <a href="tel:+390551234567" class="footer-text footer-contact-text footer-contact-text--link">+39 055 123 4567</a>
+              </li>
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-envelope-fill"></i></span>
+                <a href="mailto:info@pitex-engineering.com" class="footer-text footer-contact-text footer-contact-text--link">info@pitex-engineering.com</a>
+              </li>
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-clock-fill"></i></span>
+                <span class="footer-text footer-contact-text" data-i18n="common.footer.hours">Mon – Fri, 8:00 – 18:00 CET</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="footer-col">
+            <h3 class="footer-heading" data-i18n="common.footer.locationHeading">Our Location</h3>
+            <div class="footer-map-frame">
+              <iframe
+                src="https://maps.google.com/maps?q=Via%20dell'Industria%2012%2C%20Firenze%2C%20Italy&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                title="PITEX facility location on Google Maps"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                aria-label="Map showing the PITEX facility in Firenze, Italy"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copy" data-i18n="common.footer.copyright">© 2026 PITEX. All Rights Reserved.</p>
+        <nav class="footer-legal" aria-label="Legal">
+          <a href="#" class="footer-legal-link" data-i18n="common.footer.privacy">Privacy Policy</a>
+          <a href="#" class="footer-legal-link" data-i18n="common.footer.terms">Terms &amp; Conditions</a>
+          <a href="#" class="footer-legal-link" data-i18n="common.footer.cookies">Cookie Policy</a>
+        </nav>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Back To Top -->
+  <button type="button" id="backToTop" class="back-to-top" aria-label="Back to top"
+    data-i18n-attr-aria-label="common.aria.backToTop">
+    <svg class="back-to-top__ring" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+      <circle class="back-to-top__ring-track" cx="24" cy="24" r="21"></circle>
+      <circle class="back-to-top__ring-fill" cx="24" cy="24" r="21"></circle>
+    </svg>
+    <i class="bi bi-arrow-up back-to-top__icon" aria-hidden="true"></i>
+  </button>
+
+  <!-- Libraries -->
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+
+  <!-- App -->
+  <!-- Localization (i18n) engine — lang-inline-data.js already loaded in
+       <head> (see EARLY LANGUAGE INIT). These must still load before any
+       script that renders translatable text. -->
+  <script defer src="assets/js/i18n-utils.js"></script>
+  <script defer src="assets/js/translator.js"></script>
+  <script defer src="assets/js/language.js"></script>
+
+<script defer src="assets/js/main.js?v=versionD-insights-contact"></script>
+  <script defer src="assets/js/header.js"></script>
+  <script defer src="assets/js/services.js"></script>
+  <script defer src="assets/js/success.js"></script>
+  <script defer src="assets/js/page-banner.js"></script>
+
+</body>
+</html>

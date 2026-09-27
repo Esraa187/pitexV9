@@ -1,0 +1,408 @@
+/* =========================================================================
+   PITEX — gallery.css
+   Page-specific styles for the Gallery page only. Reuses design tokens
+   from utilities.css (--primary/--primary-rgb/--secondary/--shadow/
+   --radius/--ease-premium), .section-badge/.section-title/.section-subtitle,
+   .breadcrumb-custom, .container-custom, .ambient-blob/.particle-field,
+   .card-sweep and .glass-card as-is — nothing here re-declares a
+   primitive that already exists elsewhere. The hero recipe (blueprint
+   grid, drifting glow, floating line-shapes) mirrors .certificates-hero
+   exactly, renamed to .gallery-hero so both pages can evolve
+   independently without a shared class fighting two layouts. The closing
+   CTA reuses .final-cta-section verbatim (wired in via gallary.html, no
+   new CSS needed for it).
+
+   NOTE ON MOTION OWNERSHIP (same convention used sitewide): continuous
+   idle motion and hover transforms are GSAP-owned in gallery.js. CSS
+   here owns static layout plus non-transform hover affordances
+   (box-shadow, border-color, background, opacity).
+
+   ACCENT COLOR: alongside --primary, category badges alternate in a
+   second olive-green accent (149, 214, 0) — the same accent already
+   used for .certificates-hero-glow--two — kept local here as
+   --gallery-accent-rgb rather than promoted to a global token no other
+   page currently needs.
+   ========================================================================= */
+
+.gallery-hero,
+.gallery-intro-section,
+.gallery-section,
+.gallery-lightbox {
+  --gallery-accent-rgb: 149, 214, 0;
+}
+
+/* =========================================================================
+   HERO — small internal-page banner (not a full-bleed image hero)
+   ========================================================================= */
+.gallery-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  padding-top: clamp(6.5rem, 5rem + 5vw, 10rem);
+  padding-bottom: clamp(4rem, 3rem + 3vw, 6rem);
+  text-align: center;
+}
+
+.gallery-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gallery-hero-glow {
+  position: absolute;
+  top: -20%;
+  right: -12%;
+  width: 60%;
+  padding-bottom: 60%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, rgba(var(--primary-rgb), 0.16), transparent 70%);
+  animation: gallery-hero-drift 26s ease-in-out infinite;
+}
+.gallery-hero-glow--two {
+  top: auto;
+  right: auto;
+  bottom: -25%;
+  left: -14%;
+  width: 46%;
+  padding-bottom: 46%;
+  background: radial-gradient(circle at 50% 50%, rgba(var(--gallery-accent-rgb), 0.1), transparent 72%);
+  animation: gallery-hero-drift 32s ease-in-out infinite reverse;
+}
+@keyframes gallery-hero-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-24px, 26px) scale(1.08); }
+}
+
+.gallery-hero-blueprint {
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image:
+    linear-gradient(rgba(var(--primary-rgb), 0.9) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--primary-rgb), 0.9) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 20%, #000 30%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 20%, #000 30%, transparent 85%);
+}
+
+.gallery-hero-shape {
+  position: absolute;
+  border: 1px solid rgba(var(--primary-rgb), 0.16);
+  pointer-events: none;
+}
+.gallery-hero-shape--ring-lg {
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  top: 8%;
+  right: 6%;
+}
+.gallery-hero-shape--ring-sm {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border-color: rgba(var(--gallery-accent-rgb), 0.22);
+  bottom: 10%;
+  left: 7%;
+}
+.gallery-hero-shape--square {
+  width: 90px;
+  height: 90px;
+  top: 18%;
+  left: 10%;
+  transform: rotate(18deg);
+  border-color: rgba(var(--primary-rgb), 0.14);
+}
+
+.gallery-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  margin-inline: auto;
+}
+
+.gallery-hero .breadcrumb-custom {
+  justify-content: center;
+  margin-bottom: 1.4rem;
+}
+.gallery-hero .section-badge { margin-inline: auto; }
+.gallery-hero-title { margin-top: 1.1rem; }
+.gallery-hero .section-subtitle { margin-inline: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-hero-glow,
+  .gallery-hero-glow--two { animation: none; }
+}
+
+/* =========================================================================
+   INTRO
+   ========================================================================= */
+.gallery-intro-section .section-header { margin-inline: auto; }
+
+/* =========================================================================
+   MASONRY GALLERY
+   ========================================================================= */
+.gallery-section {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.gallery-section .section-header { margin-inline: auto; }
+
+.gallery-masonry {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(1.1rem, 1.4vw, 1.6rem);
+  margin-top: clamp(2.5rem, 4vw, 4rem);
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 1199.98px) {
+  .gallery-masonry { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 767.98px) {
+  .gallery-masonry { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 479.98px) {
+  .gallery-masonry { grid-template-columns: 1fr; }
+}
+
+/* Every card is a uniform, fixed-ratio tile — no masonry spans, so
+   every row lines up perfectly at every breakpoint. */
+.gallery-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  isolation: isolate;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  background: var(--bg-light);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 300ms var(--ease-premium);
+}
+.gallery-card:hover,
+.gallery-card:focus-visible {
+  box-shadow: 0 20px 45px -12px rgba(3, 13, 26, 0.35), var(--shadow);
+}
+.gallery-card:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.gallery-card__media {
+  position: absolute;
+  inset: 0;
+}
+.gallery-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform-origin: center;
+  transition: transform 300ms var(--ease-premium);
+}
+.gallery-card:hover .gallery-card__media img,
+.gallery-card:focus-visible .gallery-card__media img {
+  transform: scale(1.06);
+}
+
+/* Dark gradient overlay — simple fade-in on hover, kept subtle so it
+   doesn't compete with the image zoom. */
+.gallery-card__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(0deg, rgba(3, 13, 26, 0.55) 0%, rgba(3, 13, 26, 0.1) 55%, rgba(3, 13, 26, 0) 100%);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-premium);
+}
+.gallery-card:hover .gallery-card__overlay,
+.gallery-card:focus-visible .gallery-card__overlay {
+  opacity: 1;
+}
+
+.gallery-card__view {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-size: 0.95rem;
+  opacity: 0;
+  transition: opacity 300ms var(--ease-premium);
+}
+.gallery-card:hover .gallery-card__view,
+.gallery-card:focus-visible .gallery-card__view {
+  opacity: 1;
+}
+
+.gallery-card__title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 1.02rem;
+  line-height: 1.3;
+  color: #fff;
+  margin: 0 0 0.25rem;
+}
+
+.gallery-card__loc {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+.gallery-card__loc i { font-size: 0.72rem; opacity: 0.85; }
+
+@media (hover: none) {
+  /* Touch devices: no hover state to rely on, so keep the tile static */
+  .gallery-card__view { display: none; }
+}
+
+/* =========================================================================
+   LIGHTBOX (fullscreen premium popup, extends the .cert-modal recipe
+   with prev/next navigation, an image counter and swipe support)
+   ========================================================================= */
+.gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  pointer-events: none;
+}
+.gallery-lightbox.is-open {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.gallery-lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 14, 26, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 0;
+}
+
+.gallery-lightbox-stage {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, 94vw);
+  height: 90vh;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.94);
+}
+
+.gallery-lightbox-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 60px 140px rgba(3, 13, 26, 0.55);
+}
+
+.gallery-lightbox-frame img {
+  max-width: 100%;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  display: block;
+  border-radius: var(--radius-md);
+  opacity: 0;
+  transform: scale(0.97);
+  transition: opacity 0.35s var(--ease-premium), transform 0.35s var(--ease-premium);
+}
+.gallery-lightbox-frame img.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.gallery-lightbox-close,
+.gallery-lightbox-nav {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.4s ease, transform 0.4s var(--ease-premium), color 0.4s ease;
+}
+.gallery-lightbox-close:hover,
+.gallery-lightbox-nav:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.gallery-lightbox-close:focus-visible,
+.gallery-lightbox-nav:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.gallery-lightbox-close {
+  top: clamp(0.75rem, 2vw, 1.5rem);
+  right: clamp(0.75rem, 2vw, 1.5rem);
+  width: 44px;
+  height: 44px;
+  font-size: 1.1rem;
+}
+.gallery-lightbox-close:hover { transform: rotate(90deg); }
+
+.gallery-lightbox-nav {
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  font-size: 1.2rem;
+  transform: translateY(-50%);
+}
+.gallery-lightbox-nav:hover { transform: translateY(-50%) scale(1.08); }
+.gallery-lightbox-nav--prev { left: clamp(0.5rem, 3vw, 2rem); }
+.gallery-lightbox-nav--next { right: clamp(0.5rem, 3vw, 2rem); }
+
+@media (max-width: 767.98px) {
+  .gallery-lightbox-nav { width: 42px; height: 42px; font-size: 1rem; }
+  .gallery-lightbox-nav--prev { left: 0.5rem; }
+  .gallery-lightbox-nav--next { right: 0.5rem; }
+}
+
+body.gallery-lightbox-open { overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-lightbox-frame img { transition: none; }
+}

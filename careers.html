@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- =====================================================================
+       EARLY LANGUAGE INIT (must stay first in <head>, before any CSS/JS
+       that isn't itself part of this block) — fixes the Arabic/English
+       FOUC (flash of untranslated content) on page load and navigation.
+
+       Runs synchronously, before the browser paints anything:
+         1. Reads the saved language from localStorage (same key
+            language.js uses) and sets <html lang dir> immediately, so
+            layout direction is correct from the very first pixel.
+         2. Hides <body> (visibility, not display — no layout shift) via
+            the inline <style> right below, so *even the static English
+            text already sitting in the HTML* never becomes visible
+            before translator.js overwrites it.
+         3. language.js removes the 'i18n-boot' class the moment its
+            first translateElement() pass finishes (typically a
+            fraction of a millisecond after DOMContentLoaded, since the
+            dictionary is preloaded synchronously via lang-inline-data.js
+            just below — no network fetch is on the critical path).
+         4. The setTimeout below is only a safety net in case JS fails
+            to load/execute for some reason — the page reveals itself
+            after 1.5s no matter what, so a script error never leaves
+            a permanently blank page.
+       ===================================================================== -->
+  <script>
+    (function () {
+      var STORAGE_KEY = 'pitex_lang'; // must match language.js
+      var SUPPORTED = ['en', 'ar'];
+      var RTL = ['ar'];
+      var saved = null;
+      try { saved = window.localStorage.getItem(STORAGE_KEY); } catch (e) { }
+      var browserLang = (navigator.language || '').slice(0, 2);
+      var lang = (saved && SUPPORTED.indexOf(saved) !== -1 && saved) ||
+        (SUPPORTED.indexOf(browserLang) !== -1 && browserLang) ||
+        'en';
+      var html = document.documentElement;
+      html.setAttribute('lang', lang);
+      html.setAttribute('dir', RTL.indexOf(lang) !== -1 ? 'rtl' : 'ltr');
+      html.classList.add('i18n-boot');
+      window.__PITEX_INITIAL_LANG__ = lang;
+      window.__PITEX_I18N_TIMEOUT__ = setTimeout(function () {
+        html.classList.remove('i18n-boot');
+      }, 1500);
+    })();
+  </script>
+  <style>
+    /* Paired with the script above: keeps the page invisible only for the
+       brief window between "HTML parsed" and "first translate pass done".
+       visibility (not display) is used so no element ever changes size or
+       position when the class is removed - zero layout shift. */
+    html.i18n-boot body {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    body {
+      transition: opacity .15s ease;
+    }
+  </style>
+  <noscript>
+    <style>
+      html.i18n-boot body {
+        visibility: visible;
+        opacity: 1;
+      }
+    </style>
+  </noscript>
+
+  <!-- Embedded EN/AR dictionaries, loaded synchronously (no `defer`) so
+       they're sitting in memory before <body> is even parsed - the first
+       translateElement() pass never has to wait on a network fetch. -->
+  <script src="assets/js/lang-inline-data.js"></script>
+  <title>Careers | PITEX Olive Oil Manufacturing</title>
+  <meta name="description"
+    content="Build your career at PITEX. Explore open engineering roles, our hiring process, and what it's like to work on world-class olive oil manufacturing lines." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Careers | PITEX Olive Oil Manufacturing" />
+  <meta property="og:description"
+    content="Build your career at PITEX. Explore open engineering roles, our hiring process, and what it's like to work on world-class olive oil manufacturing lines." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/images/preview.jpg" />
+
+  <!-- Schema.org -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Careers at PITEX",
+    "url": "careers.html",
+    "isPartOf": {
+      "@type": "Organization",
+      "name": "PITEX",
+      "email": "info@pitex-engineering.com",
+      "telephone": "+39-055-123-4567",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Via dell'Industria, 12",
+        "addressLocality": "Firenze",
+        "addressCountry": "Italy"
+      }
+    }
+  }
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Almarai:wght@300;400;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap grid only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Lenis (buttery smooth scroll) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.css">
+
+  <!-- Design system (unchanged, reused as-is) -->
+  <link rel="stylesheet" href="assets/css/utilities.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/header.css">
+  <link rel="stylesheet" href="assets/css/animations.css">
+  <link rel="stylesheet" href="assets/css/page-banner.css">
+  <link rel="stylesheet" href="assets/css/about.css">
+  <!-- The Application Form reuses the .contact-section split-panel
+       component family verbatim (from the Contact page), including its
+       form-checkbox-row, has-error/error-text and submit-button loading/
+       success states — all defined in contact.css, so it's linked here
+       rather than duplicating those rules. -->
+  <link rel="stylesheet" href="assets/css/contact.css">
+  <!-- Page-specific additions only: job cards, select theming, success
+       modal. Hero (.page-banner), Why Join cards (.applications-section/
+       .application-card), Hiring Process timeline (.process-section/
+       .timeline) and FAQ (.faq-section/.faq-accordion) all reuse existing
+       CSS verbatim — see careers.css's file header for the full
+       ownership-split notes. -->
+  <link rel="stylesheet" href="assets/css/careers.css">
+  <link rel="stylesheet" href="assets/css/rtl.css">
+</head>
+
+<body>
+
+  <!-- =========================================================
+       HEADER / PRIMARY NAVIGATION
+       ========================================================= -->
+  <header class="site-header" id="siteHeader" data-header>
+    <div class="container site-header__inner">
+
+      <nav class="site-header__nav--primary" aria-label="Primary">
+        <ul class="site-header__list">
+
+          <li class="site-header__item">
+            <a href="index.html" class="site-header__link" data-nav-link data-section="about">
+              <span data-i18n="common.nav.home">Home</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+
+          <li class="site-header__item site-header__item--has-mega" data-mega-item>
+            <button type="button" class="site-header__link site-header__link--trigger" aria-haspopup="true"
+              aria-expanded="false" aria-controls="companyMenu" data-section="features" data-mega-trigger>
+              <span data-i18n="common.nav.company">Company</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+              <i class="bi bi-chevron-down site-header__chevron" aria-hidden="true"></i>
+            </button>
+
+            <div class="mega-menu mega-menu--dropdown glass-card" id="companyMenu" data-mega-panel role="menu"
+              aria-label="Company">
+              <div class="mega-menu__grid">
+                <a href="about.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.about">Our Story</span>
+                  </span>
+                </a>
+                <a href="leadership.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.leadership">Leadership</span>
+                  </span>
+                </a>
+                <a href="certificates.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.certificates">Certificates</span>
+                  </span>
+                </a>
+                <a href="success-partners.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.successPartners">Success Partners</span>
+                  </span>
+                </a>
+                <a href="careers.html" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.career">Career</span>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </li>
+
+          <li class="site-header__item">
+            <a href="services.html" class="site-header__link" data-nav-link>
+              <span data-i18n="common.nav.services">Services</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+
+          <li class="site-header__item site-header__item--has-mega" data-mega-item>
+            <a href="production-lines.html" id="navProductionLines" class="site-header__link site-header__link--trigger"
+              data-nav-link data-mega-link data-section="about">
+              <span data-i18n="common.nav.productionLines">Production Lines</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+            <button type="button" class="site-header__mega-toggle" aria-haspopup="true" aria-expanded="false"
+              aria-controls="productionLinesMenu" aria-label="Show Production Lines menu" data-mega-trigger>
+              <i class="bi bi-chevron-down site-header__chevron" aria-hidden="true"></i>
+            </button>
+
+            <div class="mega-menu mega-menu--dropdown mega-menu--wide glass-card" id="productionLinesMenu"
+              data-mega-panel role="menu" aria-label="Production Lines">
+              <div class="mega-menu__grid">
+                <a href="products.html?category=pitting-slicing-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.pittingSlicing">Pitting &amp;
+                      Slicing Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=olive-grading-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.oliveGrading">Olive Grading Line
+                      (Standard Olive Sizing)</span>
+                  </span>
+                </a>
+                <a href="products.html?category=filling-pasteurization-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.fillingPasteurization">Filling &amp;
+                      Pasteurization Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=roasting-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.roasting">Roasting Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=pepper-cucumber-perforation-line" class="mega-menu__item"
+                  role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.pepperCucumber">Pepper &amp;
+                      Cucumber Perforation Line</span>
+                  </span>
+                </a>
+                <a href="products.html?category=pickle-mixing-line" class="mega-menu__item" role="menuitem">
+                  <span class="mega-menu__body">
+                    <span class="mega-menu__title" data-i18n="common.nav.categories.pickleMixing">Pickle Mixing
+                      Line</span>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </li>
+
+          <li class="site-header__item">
+            <a href="gallary.html" class="site-header__link" data-nav-link>
+              <span data-i18n="common.nav.gallery">Gallery</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+
+          <li class="site-header__item">
+            <a href="contact.html" class="site-header__link" data-nav-link data-section="contact">
+              <span data-i18n="common.nav.contact">Contact Us</span>
+              <span class="site-header__underline" aria-hidden="true"></span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <a href="#" class="site-header__logo" aria-label="PITEX home" data-header-logo>
+        <img src="assets/images/pitex-logo.png" alt="PITEX" loading="eager" decoding="async" />
+      </a>
+
+      <div class="site-header__actions">
+
+        <div class="lang-switch" data-lang-switch>
+          <button type="button" class="lang-switch__trigger" aria-haspopup="listbox" aria-expanded="false"
+            data-lang-trigger>
+            <i class="bi bi-globe2 lang-switch__icon" aria-hidden="true"></i>
+            <span data-lang-current>EN</span>
+          </button>
+          <ul class="lang-switch__menu" role="listbox" data-i18n-attr-aria-label="common.langSwitch.selectLanguage"
+            aria-label="Select language" data-lang-menu>
+            <li role="option" aria-selected="true"><button type="button" data-lang="en">English</button></li>
+            <li role="option" aria-selected="false"><button type="button" data-lang="ar">العربية</button></li>
+          </ul>
+        </div>
+
+        <button type="button" class="btn-primary-custom site-header__cta" data-header-cta>
+          <span data-i18n="common.header.requestQuote">Request Quote</span>
+          <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+        </button>
+
+        <button type="button" class="hamburger" data-i18n-attr-aria-label="common.header.openMenu"
+          aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav" data-hamburger>
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MOBILE FULLSCREEN OFFCANVAS NAVIGATION -->
+  <div class="mobile-nav" id="mobileNav" data-mobile-nav aria-hidden="true">
+    <div class="mobile-nav__backdrop" data-mobile-backdrop></div>
+
+    <div class="mobile-nav__panel" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+      <div class="mobile-nav__top">
+        <a href="#" class="mobile-nav__logo" aria-label="PITEX home">
+          <img src="assets/images/pitex-logo.png" alt="PITEX" width="480" height="345" loading="lazy" />
+        </a>
+        <button type="button" class="mobile-nav__close" aria-label="Close menu" data-mobile-close>
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <nav class="mobile-nav__links" aria-label="Mobile primary">
+        <a href="index.html" class="mobile-nav__link" data-mobile-link style="--i:0"
+          data-i18n="common.nav.home">Home</a>
+
+        <div class="mobile-nav__group" data-mobile-group>
+          <button type="button" class="mobile-nav__link mobile-nav__toggle" data-mobile-toggle aria-expanded="false"
+            aria-controls="mobileCompanyMenu" style="--i:1">
+            <span data-i18n="common.nav.company">Company</span>
+            <i class="bi bi-chevron-down mobile-nav__toggle-chevron" aria-hidden="true"></i>
+          </button>
+          <div class="mobile-nav__submenu-wrap" id="mobileCompanyMenu" data-mobile-submenu>
+            <div class="mobile-nav__submenu">
+              <a href="about.html" class="mobile-nav__sublink" data-mobile-link data-i18n="common.nav.about">Our
+                Story</a>
+              <a href="leadership.html" class="mobile-nav__sublink" data-mobile-link
+                data-i18n="common.nav.leadership">Leadership</a>
+              <a href="certificates.html" class="mobile-nav__sublink" data-mobile-link
+                data-i18n="common.nav.certificates">Certificates</a>
+              <a href="success-partners.html" class="mobile-nav__sublink" data-mobile-link
+                data-i18n="common.nav.successPartners">Success Partners</a>
+              <a href="careers.html" class="mobile-nav__sublink" data-mobile-link
+                data-i18n="common.nav.career">Career</a>
+            </div>
+          </div>
+        </div>
+
+        <a href="services.html" class="mobile-nav__link" data-mobile-link style="--i:2"
+          data-i18n="common.nav.services">Services</a>
+
+        <div class="mobile-nav__group" data-mobile-group>
+          <div class="mobile-nav__group-row">
+            <a href="production-lines.html" id="navProductionLinesMobile" class="mobile-nav__link" data-mobile-link
+              style="--i:3" data-i18n="common.nav.productionLines">Production Lines</a>
+            <button type="button" class="mobile-nav__toggle-btn" data-mobile-toggle aria-expanded="false"
+              aria-controls="mobileProductionLinesMenu" aria-label="Show Production Lines menu" style="--i:3">
+              <i class="bi bi-chevron-down mobile-nav__toggle-chevron" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="mobile-nav__submenu-wrap" id="mobileProductionLinesMenu" data-mobile-submenu>
+            <div class="mobile-nav__submenu">
+              <a href="products.html?category=pitting-slicing-line" class="mobile-nav__sublink" data-mobile-link
+                data-i18n="common.nav.categories.pittingSlicing">Pitting &amp; Slicing Line</a>
+              <a href="products.html?category=olive-grading-line" class="mobile-nav__sublink" data-mobile-link
+                data-i18n="common.nav.categories.oliveGrading">Olive Grading Line (Standard Olive Sizing)</a>
+              <a href="products.html?category=filling-pasteurization-line" class="mobile-nav__sublink" data-mobile-link
+                data-i18n="common.nav.categories.fillingPasteurization">Filling &amp; Pasteurization Line</a>
+              <a href="products.html?category=roasting-line" class="mobile-nav__sublink" data-mobile-link
+                data-i18n="common.nav.categories.roasting">Roasting Line</a>
+              <a href="products.html?category=pepper-cucumber-perforation-line" class="mobile-nav__sublink"
+                data-mobile-link data-i18n="common.nav.categories.pepperCucumber">Pepper &amp; Cucumber Perforation
+                Line</a>
+              <a href="products.html?category=pickle-mixing-line" class="mobile-nav__sublink" data-mobile-link
+                data-i18n="common.nav.categories.pickleMixing">Pickle Mixing Line</a>
+            </div>
+          </div>
+        </div>
+
+        <a href="gallary.html" class="mobile-nav__link" data-mobile-link style="--i:4"
+          data-i18n="common.nav.gallery">Gallery</a>
+        <a href="contact.html" class="mobile-nav__link" data-mobile-link style="--i:5"
+          data-i18n="common.nav.contact">Contact Us</a>
+      </nav>
+
+      <div class="mobile-nav__bottom">
+        <button type="button" class="btn-primary-custom mobile-nav__cta">
+          <span data-i18n="common.header.requestQuote">Request Quote</span>
+          <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+        </button>
+
+        <div class="mobile-nav__lang" role="group" data-i18n-attr-aria-label="common.langSwitch.selectLanguage"
+          aria-label="Select language">
+          <button type="button" data-lang="en" aria-selected="true">EN</button>
+          <button type="button" data-lang="ar" aria-selected="false">AR</button>
+        </div>
+
+        <div class="mobile-nav__contact">
+          <a href="tel:+390551234567"><i class="bi bi-telephone-fill" aria-hidden="true"></i> +39 055 123 4567</a>
+          <a href="mailto:info@pitex-engineering.com"><i class="bi bi-envelope-fill" aria-hidden="true"></i>
+            info@pitex-engineering.com</a>
+        </div>
+
+        <ul class="mobile-nav__social" role="list">
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.linkedin" aria-label="PITEX on LinkedIn"><i
+                class="bi bi-linkedin" aria-hidden="true"></i></a></li>
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.facebook" aria-label="PITEX on Facebook"><i
+                class="bi bi-facebook" aria-hidden="true"></i></a></li>
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.instagram" aria-label="PITEX on Instagram"><i
+                class="bi bi-instagram" aria-hidden="true"></i></a></li>
+          <li><a href="#" data-i18n-attr-aria-label="common.footer.social.youtube" aria-label="PITEX on YouTube"><i
+                class="bi bi-youtube" aria-hidden="true"></i></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =========================================================
+       PAGE BANNER — reused verbatim from the shared component
+       (assets/css/page-banner.css + assets/js/page-banner.js).
+       Only the breadcrumb, title, subtitle and background image
+       change; entrance choreography (bg zoom-out, crumb fade,
+       title split-word reveal, subtitle fade, parallax on scroll)
+       is already wired generically by page-banner.js.
+       ========================================================= -->
+  <section class="page-banner careers-hero ambient-particles" id="hero" data-particle-density="0.6"
+    aria-labelledby="page-banner-title">
+
+    <div class="page-banner__bg" aria-hidden="true">
+      <img src="assets/images/machine-3-BclqmCUT.jpg" alt="" loading="eager" />
+    </div>
+    <div class="page-banner__overlay-2" aria-hidden="true"></div>
+    <div class="page-banner__vignette" aria-hidden="true"></div>
+    <div class="page-banner__light" aria-hidden="true"></div>
+    <div class="page-banner__curve" aria-hidden="true"></div>
+
+    <div class="container-custom page-banner__inner">
+      <div class="page-banner__crumb glass-card-banner">
+        <nav class="breadcrumb-custom" aria-label="Breadcrumb">
+          <a href="index.html" data-i18n="common.nav.home">Home</a>
+          <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          <span aria-current="page" data-i18n="common.nav.career">Careers</span>
+        </nav>
+      </div>
+
+      <h1 class="page-banner__title" id="page-banner-title" data-i18n="pages.careers.banner.title">Careers</h1>
+      <p class="page-banner__subtitle" data-i18n="pages.careers.banner.subtitle">Join PITEX and become part of a team
+        building world-class olive oil manufacturing solutions.</p>
+    </div>
+  </section>
+
+
+
+
+
+
+
+  <!-- =========================================================
+       APPLICATION FORM
+       Reuses .contact-section split-panel layout (.contact-card /
+       .contact-panel--info / .contact-panel--form / .form-group-custom
+       / .form-input-custom / .contact-submit-btn) verbatim from
+       style.css. Entrance is already wired by initContactSection() in
+       main.js; careers.js only owns validation, the loading/success
+       button state and opening the success modal (no CV upload field,
+       per spec — the CV goes over WhatsApp after submit).
+       ========================================================= -->
+  <section class="contact-section section-padding bg-gradient-soft" id="apply" aria-labelledby="apply-form-title">
+    <div class="container-custom">
+      <div class="section-header section-header--center">
+        <span class="section-badge" data-i18n="pages.careers.apply.badge">Apply Now</span>
+        <h2 class="section-title" id="apply-form-title" data-i18n="pages.careers.apply.title">Submit Your Application
+        </h2>
+        <p class="section-subtitle" data-i18n="pages.careers.apply.subtitle">Fill in your details below — you'll send
+          your CV over WhatsApp as the final step.</p>
+      </div>
+
+      <div class="contact-card radius-xl shadow-soft" style="margin-top: clamp(2.5rem, 4vw, 4rem);">
+
+        <!-- Left: info panel -->
+        <div class="contact-panel contact-panel--info">
+          <div class="contact-panel__glow" aria-hidden="true"></div>
+          <div class="ambient-blob contact-panel__blob" aria-hidden="true"
+            style="width:260px;height:260px;top:-10%;left:-15%;"></div>
+          <div class="particle-field" id="contactParticles" aria-hidden="true"></div>
+
+          <span class="section-badge section-badge--light" data-i18n="pages.careers.apply.info.badge">How It
+            Works</span>
+          <h3 class="contact-heading" data-i18n="pages.careers.apply.info.heading">Two Simple Steps to Apply</h3>
+          <p class="contact-desc" data-i18n="pages.careers.apply.info.desc">Tell us about yourself in the form, then
+            send your CV directly to our HR team on WhatsApp — no uploads, no portals.</p>
+
+          <ul class="contact-info-list list-unstyled">
+            <li class="contact-info-item">
+              <span class="contact-icon" aria-hidden="true"><i class="bi bi-1-circle-fill"></i></span>
+              <span>
+                <span class="contact-info-label" data-i18n="pages.careers.apply.info.stepOneLabel">Step One</span>
+                <span class="contact-info-value" data-i18n="pages.careers.apply.info.stepOneValue">Submit the form with
+                  your details</span>
+              </span>
+            </li>
+            <li class="contact-info-item">
+              <span class="contact-icon" aria-hidden="true"><i class="bi bi-2-circle-fill"></i></span>
+              <span>
+                <span class="contact-info-label" data-i18n="pages.careers.apply.info.stepTwoLabel">Step Two</span>
+                <span class="contact-info-value" data-i18n="pages.careers.apply.info.stepTwoValue">Send your CV via
+                  WhatsApp</span>
+              </span>
+            </li>
+            <li class="contact-info-item">
+              <span class="contact-icon" aria-hidden="true"><i class="bi bi-envelope-fill"></i></span>
+              <span>
+                <span class="contact-info-label" data-i18n="pages.careers.apply.info.emailLabel">Or Email HR</span>
+                <a href="mailto:careers@pitex-engineering.com"
+                  class="contact-info-value">careers@pitex-engineering.com</a>
+              </span>
+            </li>
+          </ul>
+
+          <div class="contact-badges">
+            <span class="contact-mini-badge"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i> <span
+                data-i18n="pages.careers.apply.info.replyBadge">HR replies within 48h</span></span>
+            <span class="contact-mini-badge"><span class="availability-chip__dot" aria-hidden="true"></span> <span
+                data-i18n="pages.careers.apply.info.hiringBadge">Hiring Worldwide</span></span>
+          </div>
+        </div>
+
+        <!-- Right: form panel -->
+        <div class="contact-panel contact-panel--form">
+          <form id="applicationForm" novalidate>
+            <div id="applicationFormFields">
+              <div class="form-row">
+                <div class="form-group-custom">
+                  <label class="form-label-custom" for="appFullName" data-i18n="pages.careers.apply.form.fullName">Full
+                    Name</label>
+                  <input class="form-input-custom" type="text" id="appFullName" name="fullName" placeholder="John Doe"
+                    autocomplete="name" required />
+                  <span class="form-error-text" data-i18n="pages.careers.apply.form.fullNameError">Please enter your
+                    full name.</span>
+                </div>
+                <div class="form-group-custom">
+                  <label class="form-label-custom" for="appEmail" data-i18n="pages.careers.apply.form.email">Email
+                    Address</label>
+                  <input class="form-input-custom" type="email" id="appEmail" name="email" placeholder="john@email.com"
+                    autocomplete="email" required />
+                  <span class="form-error-text" data-i18n="common.forms.invalidEmail">Please enter a valid email
+                    address.</span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group-custom">
+                  <label class="form-label-custom" for="appPhone" data-i18n="pages.careers.apply.form.phone">Phone
+                    Number</label>
+                  <input class="form-input-custom" type="tel" id="appPhone" name="phone" placeholder="+1 555 123 4567"
+                    autocomplete="tel" required />
+                  <span class="form-error-text" data-i18n="common.forms.invalidPhone">Please enter a valid phone
+                    number.</span>
+                </div>
+                <div class="form-group-custom">
+                  <label class="form-label-custom" for="appCountry"
+                    data-i18n="pages.careers.apply.form.country">Country</label>
+                  <input class="form-input-custom" type="text" id="appCountry" name="country" placeholder="Italy"
+                    autocomplete="country-name" required />
+                  <span class="form-error-text" data-i18n="pages.careers.apply.form.countryError">Please enter your
+                    country.</span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group-custom">
+                  <label class="form-label-custom" for="appPosition"
+                    data-i18n="pages.careers.apply.form.position">Position Applying For</label>
+                  <select class="form-input-custom" id="appPosition" name="position" required>
+                    <option value="" disabled selected data-i18n="pages.careers.apply.form.selectPosition">Select a
+                      position</option>
+                    <option value="Mechanical Engineer" data-i18n="pages.careers.apply.form.positions.mechanical">
+                      Mechanical Engineer</option>
+                    <option value="Electrical Engineer" data-i18n="pages.careers.apply.form.positions.electrical">
+                      Electrical Engineer</option>
+                    <option value="Production Engineer" data-i18n="pages.careers.apply.form.positions.production">
+                      Production Engineer</option>
+                    <option value="Sales Engineer" data-i18n="pages.careers.apply.form.positions.sales">Sales Engineer
+                    </option>
+                    <option value="Maintenance Engineer" data-i18n="pages.careers.apply.form.positions.maintenance">
+                      Maintenance Engineer</option>
+                    <option value="Other / Future Opportunity" data-i18n="pages.careers.apply.form.positions.other">
+                      Other / Future Opportunity</option>
+                  </select>
+                  <span class="form-error-text" data-i18n="pages.careers.apply.form.positionError">Please select a
+                    position.</span>
+                </div>
+                <div class="form-group-custom">
+                  <label class="form-label-custom" for="appExperience"
+                    data-i18n="pages.careers.apply.form.experience">Years of Experience</label>
+                  <select class="form-input-custom" id="appExperience" name="experience" required>
+                    <option value="" disabled selected data-i18n="pages.careers.apply.form.selectExperience">Select
+                      experience</option>
+                    <option value="0-1 years" data-i18n="pages.careers.apply.form.experiences.e01">0–1 years</option>
+                    <option value="1-3 years" data-i18n="pages.careers.apply.form.experiences.e13">1–3 years</option>
+                    <option value="3-5 years" data-i18n="pages.careers.apply.form.experiences.e35">3–5 years</option>
+                    <option value="5-10 years" data-i18n="pages.careers.apply.form.experiences.e510">5–10 years</option>
+                    <option value="10+ years" data-i18n="pages.careers.apply.form.experiences.e10plus">10+ years
+                    </option>
+                  </select>
+                  <span class="form-error-text" data-i18n="pages.careers.apply.form.experienceError">Please select your
+                    experience range.</span>
+                </div>
+              </div>
+
+
+
+              <div class="form-group-custom">
+                <label class="form-label-custom" for="appMessage"
+                  data-i18n="pages.careers.apply.form.message">Message</label>
+                <textarea class="form-input-custom form-textarea-custom" id="appMessage" name="message"
+                  data-i18n-attr-placeholder="pages.careers.apply.form.messagePlaceholder"
+                  placeholder="Tell us why you'd be a great fit for PITEX…" required></textarea>
+                <span class="form-error-text" data-i18n="pages.careers.apply.form.messageError">Please enter at least 10
+                  characters.</span>
+              </div>
+
+              <div class="form-checkbox-row">
+                <input type="checkbox" id="appAgree" name="agree" required />
+                <label for="appAgree" data-i18n="pages.careers.apply.form.agree" data-i18n-html="true">I agree to the <a
+                    href="#">privacy policy</a> and consent to PITEX contacting me about this application.</label>
+              </div>
+
+              <button type="submit" class="btn-primary-custom contact-submit-btn">
+                <span class="btn-spinner" aria-hidden="true"></span>
+                <span class="btn-label-default" data-i18n="pages.careers.apply.form.submit">Submit Application</span>
+                <span class="btn-label-loading" data-i18n="pages.careers.apply.form.submitting">Submitting…</span>
+                <span class="btn-label-success"><i class="bi bi-check-lg" aria-hidden="true"></i> <span
+                    data-i18n="pages.careers.apply.form.submitted">Submitted</span></span>
+                <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       APPLICATION SUCCESS MODAL — new (careers.css / careers.js).
+       Shown after a valid submit; the WhatsApp button opens a
+       pre-filled chat with the company's HR number.
+       ========================================================= -->
+  <div class="app-modal" id="applicationModal" aria-hidden="true">
+    <div class="app-modal__backdrop" data-modal-close></div>
+    <div class="app-modal__panel glass-card" role="dialog" aria-modal="true" aria-labelledby="appModalTitle">
+      <button type="button" class="app-modal__close" data-modal-close aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <div class="app-modal__icon" aria-hidden="true"><i class="bi bi-check-lg"></i></div>
+      <h3 class="app-modal__title" id="appModalTitle" data-i18n="pages.careers.successModal.title">Application Submitted
+        Successfully</h3>
+      <p class="app-modal__text" data-i18n="pages.careers.successModal.text">Thank you for your interest in joining
+        PITEX. Your application information has been received successfully. The final step is to send your CV via
+        WhatsApp so our HR team can review your profile.</p>
+      <div class="app-modal__actions">
+        <button type="button" class="btn-primary-custom" id="sendWhatsappBtn">
+          <i class="bi bi-whatsapp" aria-hidden="true"></i> <span
+            data-i18n="pages.careers.successModal.sendWhatsapp">Send CV via WhatsApp</span>
+        </button>
+        <button type="button" class="btn-outline-custom" data-modal-close
+          data-i18n="common.buttons.close">Close</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- =========================================================
+       FAQ — reused verbatim from about.html (.faq-section /
+       .faq-accordion / .faq-item), only the questions and support
+       panel copy change. Accordion open/close logic is re-declared
+       in careers.js since initFaqAccordion is private to about.js.
+       ========================================================= -->
+  <section class="faq-section section-padding bg-surface-alt ambient-particles" id="faq" data-particle-density="0.4"
+    data-particle-managed="opacity" aria-labelledby="faq-title">
+    <div class="mv-section__blueprint" aria-hidden="true"></div>
+    <div class="particle-field" id="faqParticles" aria-hidden="true">
+      <div class="ambient-blob faq-blob faq-blob--one"></div>
+      <div class="ambient-blob faq-blob faq-blob--two"></div>
+    </div>
+
+    <div class="container-custom">
+      <div class="faq-grid">
+
+        <!-- Left: header + support panel -->
+        <div class="faq-intro">
+          <div class="about-content">
+            <span class="section-badge about-content__badge" data-i18n="pages.careers.faq.badge">FAQ</span>
+            <h2 class="section-title" id="faq-title" data-split-title data-i18n="pages.careers.faq.title">Frequently
+              Asked Questions</h2>
+            <p class="section-description about-content__desc" data-i18n="pages.careers.faq.desc">Everything you need to
+              know before you apply — from
+              how long recruitment takes to what happens if there's no open role for you today.</p>
+          </div>
+
+          <div class="faq-support glass-card">
+            <span class="card-sweep" aria-hidden="true"></span>
+
+            <div class="faq-support__live" role="status">
+              <span class="faq-support__live-dot" aria-hidden="true"></span>
+              <span data-i18n="pages.careers.faq.supportLive">HR team online</span>
+            </div>
+
+            <div class="card-icon faq-support__icon" aria-hidden="true"><i class="bi bi-headset"></i></div>
+            <h3 class="faq-support__title" data-i18n="pages.careers.faq.supportTitle">Have a Question?</h3>
+            <p class="faq-support__text" data-i18n="pages.careers.faq.supportText">Reach out to our HR team directly and
+              we'll help you find the right role at
+              PITEX.</p>
+
+            <div class="faq-support__cta-row">
+              <button type="button" class="btn-primary-custom faq-support__cta" data-scroll-to-form>
+                <span data-i18n="pages.careers.faq.supportCta">Contact HR</span>
+                <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: accordion -->
+        <div class="faq-accordion" role="presentation">
+
+          <div class="faq-item" data-faq-item>
+            <span class="faq-item__accent" aria-hidden="true"></span>
+            <span class="faq-item__corner faq-item__corner--tl" aria-hidden="true"></span>
+            <span class="faq-item__corner faq-item__corner--br" aria-hidden="true"></span>
+            <h3 class="faq-item__heading">
+              <button type="button" class="faq-item__question" id="faq-q-1" aria-expanded="false"
+                aria-controls="faq-p-1">
+                <span class="faq-item__question-text" data-i18n="pages.careers.faq.items.apply.q">How do I apply?</span>
+                <span class="faq-item__icon" aria-hidden="true"><i class="bi bi-plus-lg"></i></span>
+              </button>
+            </h3>
+            <div class="faq-item__panel" id="faq-p-1" role="region" aria-labelledby="faq-q-1" aria-hidden="true">
+              <div class="faq-item__panel-inner">
+                <p class="faq-item__answer" data-i18n="pages.careers.faq.items.apply.a">Fill in the application form on
+                  this page, then send your CV to our HR
+                  team through the WhatsApp link shown after you submit — no account or upload portal required.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-faq-item>
+            <span class="faq-item__accent" aria-hidden="true"></span>
+            <span class="faq-item__corner faq-item__corner--tl" aria-hidden="true"></span>
+            <span class="faq-item__corner faq-item__corner--br" aria-hidden="true"></span>
+            <h3 class="faq-item__heading">
+              <button type="button" class="faq-item__question" id="faq-q-2" aria-expanded="false"
+                aria-controls="faq-p-2">
+                <span class="faq-item__question-text" data-i18n="pages.careers.faq.items.timeline.q">How long does
+                  recruitment take?</span>
+                <span class="faq-item__icon" aria-hidden="true"><i class="bi bi-plus-lg"></i></span>
+              </button>
+            </h3>
+            <div class="faq-item__panel" id="faq-p-2" role="region" aria-labelledby="faq-q-2" aria-hidden="true">
+              <div class="faq-item__panel-inner">
+                <p class="faq-item__answer" data-i18n="pages.careers.faq.items.timeline.a">Most roles move from
+                  application to offer within two to three weeks,
+                  covering CV review, an HR interview and a technical interview with the relevant team lead.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-faq-item>
+            <span class="faq-item__accent" aria-hidden="true"></span>
+            <span class="faq-item__corner faq-item__corner--tl" aria-hidden="true"></span>
+            <span class="faq-item__corner faq-item__corner--br" aria-hidden="true"></span>
+            <h3 class="faq-item__heading">
+              <button type="button" class="faq-item__question" id="faq-q-3" aria-expanded="false"
+                aria-controls="faq-p-3">
+                <span class="faq-item__question-text" data-i18n="pages.careers.faq.items.noExperience.q">Can I apply
+                  without experience?</span>
+                <span class="faq-item__icon" aria-hidden="true"><i class="bi bi-plus-lg"></i></span>
+              </button>
+            </h3>
+            <div class="faq-item__panel" id="faq-p-3" role="region" aria-labelledby="faq-q-3" aria-hidden="true">
+              <div class="faq-item__panel-inner">
+                <p class="faq-item__answer" data-i18n="pages.careers.faq.items.noExperience.a">Yes. Select the "0–1
+                  years" experience range on the form — we regularly
+                  bring in junior engineers and pair them with senior mentors as part of onboarding.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" data-faq-item>
+            <span class="faq-item__accent" aria-hidden="true"></span>
+            <span class="faq-item__corner faq-item__corner--tl" aria-hidden="true"></span>
+            <span class="faq-item__corner faq-item__corner--br" aria-hidden="true"></span>
+            <h3 class="faq-item__heading">
+              <button type="button" class="faq-item__question" id="faq-q-4" aria-expanded="false"
+                aria-controls="faq-p-4">
+                <span class="faq-item__question-text" data-i18n="pages.careers.faq.items.futureCv.q">Can I submit my CV
+                  for future opportunities?</span>
+                <span class="faq-item__icon" aria-hidden="true"><i class="bi bi-plus-lg"></i></span>
+              </button>
+            </h3>
+            <div class="faq-item__panel" id="faq-p-4" role="region" aria-labelledby="faq-q-4" aria-hidden="true">
+              <div class="faq-item__panel-inner">
+                <p class="faq-item__answer" data-i18n="pages.careers.faq.items.futureCv.a">Absolutely — choose "Other /
+                  Future Opportunity" as the position on the
+                  form. We keep speculative applications on file and reach out when a matching role opens.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       TRUSTED PARTNERS SECTION — infinite logo marquee
+       ========================================================= -->
+  <section class="trusted-section section-padding bg-surface-alt" aria-labelledby="trusted-partners-title">
+    <div class="trusted-blueprint" aria-hidden="true"></div>
+    <div class="trusted-lines" aria-hidden="true"></div>
+    <span class="trusted-glow-dot trusted-glow-dot--one" aria-hidden="true"></span>
+    <span class="trusted-glow-dot trusted-glow-dot--two" aria-hidden="true"></span>
+    <div class="particle-field" id="trustedParticles" aria-hidden="true">
+      <div class="ambient-blob ambient-blob--two"></div>
+      <div class="ambient-blob ambient-blob--one"></div>
+    </div>
+
+    <div class="container-custom">
+      <header class="section-header section-header--center">
+        <span class="section-badge" data-i18n="pages.home.trusted.badge">Trusted Worldwide</span>
+        <h2 class="section-title" id="trusted-partners-title" data-i18n="pages.home.trusted.title">Trusted by Industry
+          Leaders Around the Globe</h2>
+      </header>
+    </div>
+
+    <div class="trusted-marquee" data-trusted-marquee role="region"
+      data-i18n-attr-aria-label="pages.home.trusted.ariaLabel" aria-label="Companies that trust PITEX">
+      <div class="trusted-marquee__fade trusted-marquee__fade--left" aria-hidden="true"></div>
+      <div class="trusted-marquee__fade trusted-marquee__fade--right" aria-hidden="true"></div>
+
+      <div class="trusted-marquee__track" data-trusted-track id="trustedMarqueeTrack">
+        <!-- Populated at runtime from window.PITEX_PARTNERS
+             (assets/js/partners-data.js) by assets/js/trusted-marquee.js.
+             Two identical groups are rendered so the marquee can loop
+             seamlessly at the 50% mark (see trusted-marquee-scroll
+             keyframes in style.css). Each card renders ONLY the real
+             logo image — no fabricated icon, no placeholder company name. -->
+      </div>
+    </div>
+  </section>
+
+
+  <!-- =========================================================
+       FINAL CTA — reused verbatim from index.html/contact.html;
+       initFinalCTA() in main.js picks it up automatically via the
+       .final-cta-section class selector, no new CSS/JS needed.
+       ========================================================= -->
+  <section class="final-cta-section section-padding bg-surface" id="final-cta" aria-labelledby="final-cta-title">
+    <div class="container-custom">
+      <div class="final-cta-card">
+        <div class="final-cta-bg" aria-hidden="true">
+          <div class="final-cta-blueprint"></div>
+          <div class="particle-field" id="finalCtaParticles"></div>
+          <div class="ambient-blob final-cta-blob final-cta-blob--one"></div>
+          <div class="ambient-blob final-cta-blob final-cta-blob--two"></div>
+          <div class="final-cta-glow"></div>
+          <i class="bi bi-gear-fill final-cta-gear"></i>
+        </div>
+
+        <div class="final-cta-inner">
+          <span class="section-badge section-badge--light" data-i18n="pages.careers.finalCta.badge">Join Our Team</span>
+          <h2 class="section-title section-title--light final-cta-title" id="final-cta-title"
+            data-i18n="pages.careers.finalCta.title">Ready to Build Your
+            Career with PITEX?</h2>
+          <p class="section-subtitle section-subtitle--light final-cta-desc" data-i18n="pages.careers.finalCta.desc">
+            Explore our open roles, meet the team
+            behind our production lines, and take the first step toward a career in precision engineering.</p>
+
+          <div class="final-cta-actions">
+            <button type="button" class="btn-light-custom" data-scroll-to-form>
+              <span data-i18n="pages.careers.finalCta.contactHr">Contact HR</span>
+              <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+            </button>
+            <a href="production-lines.html" class="btn-glass-custom">
+              <span data-i18n="pages.careers.finalCta.exploreProductionLines">Explore Production Lines</span>
+              <span class="btn-arrow" aria-hidden="true"><i class="bi bi-arrow-right" data-rtl-flip></i></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       FOOTER
+       ========================================================= -->
+  <footer class="site-footer" id="site-footer">
+    <div class="footer-bg" aria-hidden="true">
+      <div class="footer-blueprint"></div>
+      <div class="particle-field" id="footerParticles"></div>
+      <div class="ambient-blob footer-blob footer-blob--one"></div>
+      <div class="ambient-blob footer-blob footer-blob--two"></div>
+      <div class="footer-glass-panel" aria-hidden="true"></div>
+    </div>
+
+    <div class="container-custom footer-inner">
+
+      <div class="row g-5 footer-top">
+
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="footer-brand">
+            <a href="index.html" class="footer-logo-link" aria-label="PITEX home">
+              <img src="assets/images/logo-white.png" alt="PITEX" class="footer-logo" width="150" height="107"
+                loading="lazy" />
+            </a>
+            <p class="footer-text footer-brand__desc" data-i18n="common.footer.brandDesc">Engineering premium olive oil
+              production lines with four decades of European precision and industrial excellence.</p>
+
+            <ul class="footer-social list-unstyled" role="list">
+              <li class="footer-social__item">
+                <a href="#" class="footer-social__link" data-i18n-attr-aria-label="common.footer.social.linkedin"
+                  aria-label="PITEX on LinkedIn"><i class="bi bi-linkedin" aria-hidden="true"></i></a>
+              </li>
+              <li class="footer-social__item">
+                <a href="#" class="footer-social__link" data-i18n-attr-aria-label="common.footer.social.facebook"
+                  aria-label="PITEX on Facebook"><i class="bi bi-facebook" aria-hidden="true"></i></a>
+              </li>
+              <li class="footer-social__item">
+                <a href="https://wa.me/390551234567" class="footer-social__link" target="_blank" rel="noopener"
+                  data-i18n-attr-aria-label="common.footer.social.whatsapp" aria-label="PITEX on WhatsApp"><i
+                    class="bi bi-whatsapp" aria-hidden="true"></i></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="footer-col">
+            <h3 class="footer-heading" data-i18n="common.footer.navHeading">Navigation</h3>
+            <ul class="footer-links list-unstyled" role="list">
+              <li class="footer-links__item"><a href="index.html" class="footer-link"><i
+                    class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span
+                    data-i18n="common.footer.links.home">Home</span></a></li>
+              <li class="footer-links__item"><a href="about.html" class="footer-link"><i
+                    class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span
+                    data-i18n="common.footer.links.about">Our Story</span></a></li>
+              <li class="footer-links__item"><a href="production-lines.html" class="footer-link"><i
+                    class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span
+                    data-i18n="common.footer.links.productionLines">Production Lines</span></a></li>
+              <li class="footer-links__item"><a href="careers.html" class="footer-link"><i
+                    class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span
+                    data-i18n="common.footer.links.careers">Careers</span></a></li>
+              <li class="footer-links__item"><a href="contact.html" class="footer-link"><i
+                    class="bi bi-chevron-right footer-link__chevron" aria-hidden="true" data-rtl-flip></i><span
+                    data-i18n="common.footer.links.contact">Contact</span></a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="footer-col">
+            <h3 class="footer-heading" data-i18n="common.footer.hqHeading">Headquarters</h3>
+            <ul class="footer-contact-list list-unstyled" role="list">
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-geo-alt-fill"></i></span>
+                <span class="footer-text footer-contact-text" data-i18n="common.footer.address"
+                  data-i18n-html="true">Via dell'Industria, 12<br>Firenze, Italy</span>
+              </li>
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-telephone-fill"></i></span>
+                <a href="tel:+390551234567" class="footer-text footer-contact-text footer-contact-text--link">+39 055
+                  123 4567</a>
+              </li>
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-envelope-fill"></i></span>
+                <a href="mailto:careers@pitex-engineering.com"
+                  class="footer-text footer-contact-text footer-contact-text--link">careers@pitex-engineering.com</a>
+              </li>
+              <li class="footer-contact-item">
+                <span class="footer-contact-icon" aria-hidden="true"><i class="bi bi-clock-fill"></i></span>
+                <span class="footer-text footer-contact-text" data-i18n="common.footer.hours">Mon – Fri, 8:00 – 18:00
+                  CET</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="footer-col">
+            <h3 class="footer-heading" data-i18n="common.footer.locationHeading">Our Location</h3>
+            <div class="footer-map-frame">
+              <iframe
+                src="https://maps.google.com/maps?q=Via%20dell'Industria%2012%2C%20Firenze%2C%20Italy&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                title="PITEX facility location on Google Maps" loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                aria-label="Map showing the PITEX facility in Firenze, Italy"></iframe>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copy" data-i18n="common.footer.copyright">© 2026 PITEX. All Rights Reserved.</p>
+        <nav class="footer-legal" aria-label="Legal">
+          <a href="#" class="footer-legal-link" data-i18n="common.footer.privacy">Privacy Policy</a>
+          <a href="#" class="footer-legal-link" data-i18n="common.footer.terms">Terms &amp; Conditions</a>
+          <a href="#" class="footer-legal-link" data-i18n="common.footer.cookies">Cookie Policy</a>
+        </nav>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Back To Top -->
+  <button type="button" id="backToTop" class="back-to-top" aria-label="Back to top"
+    data-i18n-attr-aria-label="common.aria.backToTop">
+    <svg class="back-to-top__ring" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+      <circle class="back-to-top__ring-track" cx="24" cy="24" r="21"></circle>
+      <circle class="back-to-top__ring-fill" cx="24" cy="24" r="21"></circle>
+    </svg>
+    <i class="bi bi-arrow-up back-to-top__icon" aria-hidden="true"></i>
+  </button>
+
+  <!-- Libraries -->
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+
+  <!-- App -->
+  <!-- Localization (i18n) engine — lang-inline-data.js already loaded in
+       <head> (see EARLY LANGUAGE INIT). These must still load before any
+       script that renders translatable text. -->
+  <script defer src="assets/js/i18n-utils.js"></script>
+  <script defer src="assets/js/translator.js"></script>
+  <script defer src="assets/js/language.js"></script>
+
+  <script defer src="assets/js/main.js?v=versionD-insights-contact"></script>
+  <script defer src="assets/js/header.js"></script>
+  <script defer src="assets/js/page-banner.js"></script>
+  <script defer src="assets/js/careers.js"></script>
+  <script defer src="assets/js/trusted-marquee.js"></script>
+  <script defer src="assets/js/partners-data.js"></script>
+
+</body>
+
+</html>

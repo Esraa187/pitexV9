@@ -1,0 +1,37 @@
+<svg viewBox="0 0 400 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="awardTitle">
+  <title id="awardTitle">International Quality Award certificate</title>
+  <defs>
+    <linearGradient id="gAwardBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0A2F5C"/>
+      <stop offset="100%" stop-color="#051a34"/>
+    </linearGradient>
+    <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f0d38a"/>
+      <stop offset="100%" stop-color="#b8892f"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="540" fill="url(#gAwardBg)"/>
+  <rect x="16" y="16" width="368" height="508" fill="none" stroke="#c9a24b" stroke-width="1"/>
+  <text x="200" y="70" text-anchor="middle" font-family="Georgia, serif" font-size="12" letter-spacing="4" fill="#c9a24b">INTERNATIONAL</text>
+  <text x="200" y="92" text-anchor="middle" font-family="Georgia, serif" font-size="12" letter-spacing="4" fill="#c9a24b">QUALITY AWARD</text>
+  <!-- laurel wreath -->
+  <g fill="none" stroke="url(#gGold)" stroke-width="3" stroke-linecap="round">
+    <path d="M140 260 C110 300 108 360 150 400"/>
+    <path d="M148 270 C126 260 116 270 118 286"/>
+    <path d="M140 300 C118 292 108 302 112 318"/>
+    <path d="M136 332 C114 326 104 336 108 352"/>
+    <path d="M138 364 C118 360 108 372 114 386"/>
+    <path d="M260 260 C290 300 292 360 250 400"/>
+    <path d="M252 270 C274 260 284 270 282 286"/>
+    <path d="M260 300 C282 292 292 302 288 318"/>
+    <path d="M264 332 C286 326 296 336 292 352"/>
+    <path d="M262 364 C282 360 292 372 286 386"/>
+  </g>
+  <circle cx="200" cy="230" r="14" fill="url(#gGold)"/>
+  <path d="M200 218 L204 227 L214 227 L206 233 L209 243 L200 237 L191 243 L194 233 L186 227 L196 227 Z" fill="#0A2F5C"/>
+  <text x="200" y="330" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="24" fill="#ffffff">Excellence</text>
+  <text x="200" y="356" text-anchor="middle" font-family="Georgia, serif" font-size="15" fill="#e8d29c">in Manufacturing</text>
+  <line x1="150" y1="404" x2="250" y2="404" stroke="#c9a24b" stroke-width="1"/>
+  <text x="200" y="470" text-anchor="middle" font-family="Georgia, serif" font-size="12" fill="#c9a24b">World Quality Committee</text>
+  <text x="200" y="490" text-anchor="middle" font-family="Georgia, serif" font-size="11" fill="#8fa5bd">Issued 2024</text>
+</svg>

@@ -1,0 +1,23 @@
+<svg viewBox="0 0 520 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ceTitle">
+  <title id="ceTitle">CE Marking Directive certificate</title>
+  <defs>
+    <linearGradient id="gCe" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1F5C8A"/>
+      <stop offset="100%" stop-color="#0A2F5C"/>
+    </linearGradient>
+  </defs>
+  <rect width="520" height="360" fill="#f6f9fc"/>
+  <path d="M0 0 L520 0 L520 360 L260 360 Z" fill="url(#gCe)"/>
+  <path d="M300 0 L520 0 L520 180 Z" fill="#155BA9" opacity="0.4"/>
+  <g opacity="0.5">
+    <circle cx="470" cy="60" r="90" fill="none" stroke="#ffffff" stroke-width="1"/>
+    <circle cx="470" cy="60" r="60" fill="none" stroke="#ffffff" stroke-width="1"/>
+  </g>
+  <text x="40" y="66" font-family="Georgia, serif" font-size="13" letter-spacing="3" fill="#8fb7db">EUROPEAN CONFORMITY</text>
+  <text x="38" y="150" font-family="Georgia, serif" font-weight="700" font-size="72" fill="#ffffff">CE</text>
+  <line x1="40" y1="172" x2="200" y2="172" stroke="#95D600" stroke-width="3"/>
+  <text x="40" y="210" font-family="Georgia, serif" font-size="20" fill="#ffffff">Marking Directive</text>
+  <text x="40" y="234" font-family="Georgia, serif" font-size="13" fill="#c7dcef">Machinery Safety Compliance 2006/42/EC</text>
+  <text x="40" y="310" font-family="Georgia, serif" font-size="12" fill="#c7dcef">European Commission</text>
+  <text x="40" y="330" font-family="Georgia, serif" font-size="11" fill="#8fb7db">Issued 2020</text>
+</svg>

@@ -1,0 +1,842 @@
+{
+  "common": {
+    "nav": {
+      "home": "Home",
+      "company": "Company",
+      "about": "Our Story",
+      "leadership": "Leadership",
+      "certificates": "Certificates",
+      "successPartners": "Success Partners",
+      "services": "Services",
+      "productionLines": "Production Lines",
+      "gallery": "Gallery",
+      "career": "Career",
+      "contact": "Contact Us",
+      "categories": {
+        "pittingSlicing": "Pitting & Slicing Line",
+        "oliveGrading": "Olive Grading Line (Standard Olive Sizing)",
+        "fillingPasteurization": "Filling & Pasteurization Line",
+        "roasting": "Roasting Line",
+        "pepperCucumber": "Pepper & Cucumber Perforation Line",
+        "pickleMixing": "Pickle Mixing Line"
+      }
+    },
+    "langSwitch": {
+      "english": "English",
+      "arabic": "العربية",
+      "selectLanguage": "Select language"
+    },
+    "header": {
+      "requestQuote": "Request Quote",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
+    },
+    "footer": {
+      "brandDesc": "Engineering premium olive oil production lines with four decades of European precision and industrial excellence.",
+      "navHeading": "Navigation",
+      "links": {
+        "home": "Home",
+        "about": "Our Story",
+        "solutions": "Solutions",
+        "projects": "Projects",
+        "caseStudies": "Case Studies",
+        "contact": "Contact",
+        "productionLines": "Production Lines",
+        "careers": "Careers",
+        "services": "Services"
+      },
+      "hqHeading": "Headquarters",
+      "address": "Via dell'Industria, 12<br>Firenze, Italy",
+      "hours": "Mon – Fri, 8:00 – 18:00 CET",
+      "copyright": "© 2026 PITEX. All Rights Reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms & Conditions",
+      "cookies": "Cookie Policy",
+      "social": {
+        "linkedin": "PITEX on LinkedIn",
+        "facebook": "PITEX on Facebook",
+        "instagram": "PITEX on Instagram",
+        "youtube": "PITEX on YouTube",
+        "twitter": "PITEX on X (Twitter)",
+        "whatsapp": "PITEX on WhatsApp"
+      },
+      "locationHeading": "Our Location"
+    },
+    "buttons": {
+      "learnMore": "Learn More",
+      "exploreCategory": "Explore Category",
+      "viewAll": "View All",
+      "discoverStory": "Discover Our Story",
+      "requestQuote": "Request Quote",
+      "requestAQuote": "Request a Quote",
+      "viewProducts": "View Products",
+      "getAQuote": "Get a Quote",
+      "contactUs": "Contact Us",
+      "readMore": "Read More",
+      "submit": "Submit",
+      "send": "Send Message",
+      "close": "Close",
+      "previous": "Previous",
+      "next": "Next",
+      "downloadBrochure": "Download Brochure",
+      "cancel": "Cancel"
+    },
+    "forms": {
+      "required": "This field is required.",
+      "invalidEmail": "Please enter a valid email address.",
+      "invalidPhone": "Please enter a valid phone number.",
+      "minLength": "Please enter at least {{count}} characters.",
+      "success": "Thank you — your message has been sent successfully.",
+      "error": "Something went wrong. Please try again.",
+      "selectOption": "Please select an option.",
+      "namePlaceholder": "Your full name",
+      "emailPlaceholder": "you@company.com",
+      "phonePlaceholder": "+1 234 567 8900",
+      "messagePlaceholder": "Tell us about your project…",
+      "companyPlaceholder": "Company name",
+      "noMatchingCountries": "No matching countries"
+    },
+    "aria": {
+      "previousSlide": "Previous slide",
+      "nextSlide": "Next slide",
+      "scrollToDiscover": "Scroll to Discover",
+      "openGalleryImage": "Open image {{index}} of {{total}} in fullscreen",
+      "galleryImage": "Gallery image {{index}}",
+      "imageViewer": "Image viewer",
+      "closeImageViewer": "Close image viewer",
+      "previousImage": "Previous image",
+      "nextImage": "Next image",
+      "backToTop": "Back to top"
+    },
+    "misc": {
+      "loading": "Loading…",
+      "noResults": "No results found.",
+      "featured": "Featured",
+      "productLineSingular": "{{count}} Product Line",
+      "productLinePlural": "{{count}} Product Lines",
+      "machineSingular": "{{count}} machine in this category",
+      "machinePlural": "{{count}} machines in this category",
+      "machinesComingSoon": "Machines for this line are being added soon"
+    },
+    "quoteModal": {
+      "note": "You are requesting a quotation for this product.",
+      "productNameLabel": "Product Name",
+      "quantityLabel": "Quantity",
+      "quantityError": "Please enter a valid quantity.",
+      "countryLabel": "Destination Country",
+      "countryError": "Please select a destination country from the list.",
+      "companyLabel": "Company Name",
+      "companyError": "Please enter your company name.",
+      "fullNameLabel": "Full Name",
+      "fullNameError": "Please enter your full name.",
+      "emailLabel": "Email Address",
+      "phoneLabel": "Phone Number",
+      "redirecting": "Redirecting to WhatsApp…",
+      "message": {
+        "greeting": "Hello PITEX,",
+        "intro": "I would like to request a quotation.",
+        "productLabel": "Product:",
+        "quantityLabel": "Quantity:",
+        "countryLabel": "Destination Country:",
+        "companyLabel": "Company:",
+        "nameLabel": "Name:",
+        "emailLabel": "Email:",
+        "phoneLabel": "Phone:",
+        "thanks": "Thank you."
+      }
+    }
+  },
+  "pages": {
+    "home": {
+      "hero": {
+        "slide1": {
+          "eyebrow": "The PITEX Legacy",
+          "title": "Complete Olive Oil<br>Manufacturing Lines",
+          "desc": "Delivering complete engineering solutions for olive oil extraction, processing, filtration, storage, bottling and packaging using premium industrial equipment.",
+          "primaryCta": "Explore Production Lines",
+          "secondaryCta": "Get a Quote"
+        },
+        "slide2": {
+          "eyebrow": "Industrial Excellence",
+          "title": "Engineering<br>Precision &amp; Performance",
+          "desc": "Designed for maximum efficiency, higher productivity and premium olive oil quality through advanced industrial automation.",
+          "primaryCta": "Our Projects",
+          "secondaryCta": "Learn More"
+        },
+        "slide3": {
+          "eyebrow": "Our Solutions",
+          "title": "From Olive Harvest<br>To Premium Bottling",
+          "desc": "Complete turnkey manufacturing systems covering every production stage from washing olives to final packaging.",
+          "primaryCta": "View Machinery",
+          "secondaryCta": "Contact Us"
+        },
+        "scrollToDiscover": "Scroll to Discover"
+      },
+      "about": {
+        "badge": "About Pitex",
+        "title": "Global Leaders in Olive Oil Engineering",
+        "desc": "Founded in the heart of Italy's industrial valley, PITEX has redefined olive oil production through relentless innovation. We don't just build machines; we engineer end-to-end ecosystems that maximize yield, preserve quality, and ensure operational longevity.",
+        "feature1Title": "Precision Extraction",
+        "feature1Text": "Patented centrifugal tech for maximum EVOO yield.",
+        "feature2Title": "Energy Efficient",
+        "feature2Text": "40% reduction in power consumption across lines.",
+        "certTitle": "ISO 9001 Certified",
+        "certText": "Adhering to the highest European manufacturing standards for over four decades.",
+        "cta": "Discover Our Story"
+      },
+      "productionPreview": {
+        "badge": "Industrial Excellence",
+        "title": "Our Production Lines",
+        "subtitle": "A closer look at the machinery and complete lines behind every PITEX installation.",
+        "viewAll": "View All Production Lines"
+      },
+      "whyChoose": {
+        "badge": "Why Choose Us",
+        "title": "Why Industry Leaders Choose PITEX",
+        "desc": "Six reasons manufacturers across four continents trust PITEX to engineer, build and support the machinery behind their production line — from first sketch to lifetime service.",
+        "items": {
+          "engineering": {
+            "title": "Engineering Excellence",
+            "desc": "Precision-tuned for maximum reliability.",
+            "listText": "Every line is precision-tuned in-house for maximum reliability, from first concept through final commissioning."
+          },
+          "manufacturing": {
+            "title": "Custom Manufacturing",
+            "desc": "Every line engineered around your facility.",
+            "listText": "No two facilities are alike — every system is engineered around your footprint, capacity and process requirements."
+          },
+          "stainlessSteel": {
+            "title": "Premium Stainless Steel",
+            "desc": "AISI 304/316 for lifelong hygiene and durability.",
+            "listText": "Built in AISI 304/316-grade stainless steel for maximum corrosion resistance, hygiene and structural longevity."
+          },
+          "efficiency": {
+            "title": "High Production Efficiency",
+            "desc": "Engineered to maximize yield and minimize downtime.",
+            "listText": "Optimized flow and automation squeeze more usable yield out of every harvest, with minimal downtime."
+          },
+          "installation": {
+            "title": "Worldwide Installation",
+            "desc": "Commissioned across 40+ countries.",
+            "listText": "Our engineering teams commission and calibrate lines on-site across 40+ countries, start to finish."
+          },
+          "support": {
+            "title": "Lifetime Technical Support",
+            "desc": "24/7 expert support for the life of your line.",
+            "listText": "24/7 remote diagnostics and rapid spare-part delivery back every installation, for the life of the line."
+          }
+        }
+      },
+      "process": {
+        "badge": "The PITEX Process",
+        "title": "From Concept to Commissioning",
+        "subtitle": "Our structured engineering lifecycle ensures every project is delivered with surgical precision and on-time performance.",
+        "ariaLabel": "PITEX engineering process, five steps",
+        "steps": {
+          "consultation": {
+            "title": "Technical Consultation",
+            "text": "We assess your throughput goals and site requirements to scope the right solution."
+          },
+          "engineering": {
+            "title": "Custom Engineering",
+            "text": "Our engineers design a line configuration tailored to your production targets."
+          },
+          "fabrication": {
+            "title": "Precision Fab",
+            "text": "Components are fabricated in-house to exact tolerances for lasting reliability."
+          },
+          "testing": {
+            "title": "Quality Testing",
+            "text": "Every line is rigorously tested to certified standards before it ships."
+          },
+          "installation": {
+            "title": "On-site Installation",
+            "text": "Our team commissions and hands off the line ready for full production."
+          }
+        }
+      },
+      "trusted": {
+        "badge": "Trusted Worldwide",
+        "title": "Trusted by Industry Leaders Around the Globe",
+        "ariaLabel": "Companies that trust PITEX"
+      },
+      "exportMap": {
+        "badge": "Global Reach",
+        "title": "Delivering Engineering Excellence Across the World",
+        "subtitle": "With successful installations across Europe, Africa, Asia, North America, South America, and the Middle East, PITEX continues expanding its global engineering footprint.",
+        "ariaLabel": "Interactive map of PITEX export locations worldwide",
+        "legend": {
+          "operational": "Operational",
+          "commissioning": "Commissioning",
+          "headquarters": "PITEX Headquarters"
+        },
+        "stats": {
+          "years": "Years Of Experience",
+          "countries": "Countries Exported To",
+          "clients": "Satisfied Clients"
+        },
+        "popup": {
+          "installed": "Installed"
+        }
+      },
+      "finalCta": {
+        "badge": "Ready to Start?",
+        "title": "Ready to Build Your Premium Olive Oil Production Line?",
+        "primary": "Request a Quote",
+        "secondary": "View Products"
+      }
+    },
+    "productDetails": {
+      "aboutCards": {
+        "applicationsTitle": "Applications",
+        "applicationsText": "Suited to {{list}} and comparable use cases within the {{category}} stage.",
+        "industriesTitle": "Industries Served",
+        "industriesText": "Olive mills, edible-oil refineries, agro-industrial cooperatives, and OEM machine builders across the Mediterranean, MENA, EU, and international markets.",
+        "qualityTitle": "Manufacturing Quality",
+        "qualityTextWithMaterial": "Every unit is manufactured from {{material}}, precision-tested and inspected before dispatch to guarantee consistent performance.",
+        "qualityTextGeneric": "Every unit is precision-manufactured and quality-inspected before dispatch to guarantee consistent, reliable performance.",
+        "exportTitle": "Export Information",
+        "exportTextReady": "CE-compliant documentation, HS code guidance, and door-to-door logistics coordination through our worldwide network of freight partners.",
+        "exportTextOnRequest": "Export documentation and logistics coordination are available on request through our worldwide network of freight partners."
+      }
+    },
+    "productionLines": {
+      "bannerTitle": "Our <span class=\"text-accent\">Production Lines</span>"
+    },
+    "services": {
+      "banner": {
+        "title": "Our <span class=\"text-primary-custom\">Services</span>",
+        "subtitle": "Explore PITEX manufacturing facilities, production lines, international exhibitions, installations, and successful projects around the world."
+      },
+      "hero": {
+        "badge": "Lifecycle Services",
+        "title": "Engineering the <span class=\"text-primary-custom\">next century</span> of olive oil production.",
+        "desc": "From first consultation to 24/7 lifecycle support, PITEX delivers turnkey services for industrial producers who cannot afford unplanned downtime.",
+        "talkToEngineer": "Talk to an engineer",
+        "watchProcess": "Watch the process",
+        "stats": {
+          "countries": "Countries served",
+          "lines": "Lines commissioned",
+          "certified": "Certified operations"
+        },
+        "kpiChip": {
+          "value": "98.7% uptime",
+          "label": "Fleet average, 2025"
+        },
+        "infoCard": {
+          "title": "Guaranteed",
+          "text": "Performance-backed SLA on every line"
+        }
+      },
+      "grid": {
+        "badge": "What We Deliver",
+        "title": "Six services. One integrated lifecycle.",
+        "desc": "Every PITEX engagement is engineered end-to-end — from first blueprint to decades of aftercare — so nothing ever falls between the cracks.",
+        "items": {
+          "installation": {
+            "tag": "On-site",
+            "title": "Installation",
+            "text": "Turnkey mechanical and electrical installation of complete olive oil lines, executed on schedule by our certified field teams."
+          },
+          "maintenance": {
+            "tag": "Planned",
+            "title": "Maintenance",
+            "text": "Preventive and predictive maintenance programs that keep every centrifuge, decanter and press in specification."
+          },
+          "consulting": {
+            "tag": "Advisory",
+            "title": "Consulting",
+            "text": "Process engineering, feasibility studies and yield optimization from a team with 30+ years in oil extraction."
+          },
+          "training": {
+            "tag": "Certified",
+            "title": "Training",
+            "text": "Structured operator and maintenance training — on-site or at our academy — with formal PITEX certification."
+          },
+          "commissioning": {
+            "tag": "Validated",
+            "title": "Commissioning",
+            "text": "Cold and hot commissioning, SAT/FAT protocols, and formal handover documentation for full traceability."
+          },
+          "support": {
+            "tag": "24/7",
+            "title": "After-Sales Support",
+            "text": "24/7 remote diagnostics, guaranteed spare parts availability and rapid field intervention worldwide."
+          }
+        }
+      }
+    },
+    "successPartners": {
+      "banner": {
+        "title": "Success Partners",
+        "subtitle": "Four decades of engineering excellence, built together with distributors, integrators, and cooperatives across five continents."
+      },
+      "section": {
+        "badge": "Our Network",
+        "title": "Success Partners",
+        "subtitle": "The distributors, integrators, and cooperatives who help bring PITEX machinery to producers worldwide."
+      }
+    },
+    "certificates": {
+      "banner": {
+        "title": "Certificates"
+      },
+      "section": {
+        "badge": "Our Credentials",
+        "title": "Every claim we make is independently verified.",
+        "subtitle": "A complete record of the international standards, safety directives and industry awards that govern how PITEX designs, builds and ships production lines."
+      },
+      "items": {
+        "ceMarking": "CE Marking Directive",
+        "haccp": "HACCP Food Safety",
+        "qualityAward": "International Quality Award",
+        "manufacturingExcellence": "Manufacturing Excellence",
+        "madeInItaly": "Made in Italy Certification"
+      },
+      "finalCta": {
+        "badge": "Documented Assurance",
+        "title": "Confidence Built on Certified Quality.",
+        "desc": "Request our full certification catalog or speak directly with an engineer about the standards behind your next production line.",
+        "requestCatalog": "Request Catalog"
+      }
+    },
+    "leadership": {
+      "banner": {
+        "title": "Leadership"
+      },
+      "ceo": {
+        "eyebrow": "Chief Executive",
+        "name": "Alessandro Ferretti",
+        "yearsLabel": "30+ Years of Engineering Leadership",
+        "badge": "Message From the CEO",
+        "quote1": "“We don’t build machines.",
+        "quote2": "We build the quiet certainty that every batch of oil leaving our clients’ facilities will be as extraordinary as the harvest that produced it.",
+        "quote3": "That is the promise every PITEX engineer signs their name to.”",
+        "signatureRole": "CEO & Chief Engineer, PITEX"
+      },
+      "values": {
+        "badge": "Our Philosophy",
+        "title": "Chairman’s Core Values",
+        "subtitle": "These principles define how PITEX leads, innovates, and builds long-term partnerships across the global olive oil industry.",
+        "items": {
+          "integrity": {
+            "title": "Integrity",
+            "text": "We build every relationship with honesty, transparency, and long-term commitment.",
+            "tag": "Trust"
+          },
+          "engineering": {
+            "title": "Engineering Excellence",
+            "text": "Every solution reflects precision engineering and uncompromising quality.",
+            "tag": "Quality First"
+          },
+          "innovation": {
+            "title": "Innovation",
+            "text": "We continuously improve our technologies to deliver smarter production systems.",
+            "tag": "Innovation"
+          },
+          "customer": {
+            "title": "Customer Commitment",
+            "text": "Our clients’ success drives every decision we make.",
+            "tag": "Leadership"
+          },
+          "responsibility": {
+            "title": "Responsibility",
+            "text": "We take full ownership of every project from planning to commissioning.",
+            "tag": "Responsibility"
+          },
+          "global": {
+            "title": "Global Vision",
+            "text": "Building trusted partnerships across international markets with sustainable growth.",
+            "tag": "Growth"
+          }
+        }
+      },
+      "stats": {
+        "years": "Years Experience",
+        "projects": "Projects Delivered",
+        "countries": "Countries Served",
+        "machines": "Machines Installed"
+      }
+    },
+    "gallery": {
+      "banner": {
+        "title": "Inside Our <span class=\"text-primary-custom\">Manufacturing</span> World.",
+        "subtitle": "Explore PITEX manufacturing facilities, production lines, international exhibitions, installations, and successful projects around the world."
+      },
+      "section": {
+        "badge": "Our Work",
+        "title": "Facilities, machinery and projects worldwide.",
+        "subtitle": "A visual record of the equipment we engineer and the places it ends up — click any image to view it full-screen."
+      },
+      "finalCta": {
+        "badge": "Let's Build Together",
+        "title": "See Your Own Project in This Gallery.",
+        "desc": "Talk to our engineers about a production line built around your grove, your volume, and your timeline.",
+        "viewProductionLines": "View Production Lines"
+      }
+    },
+    "careers": {
+      "banner": {
+        "title": "Careers",
+        "subtitle": "Join PITEX and become part of a team building world-class olive oil manufacturing solutions."
+      },
+      "whyJoin": {
+        "badge": "Why Join PITEX",
+        "title": "A Career Built on Precision Engineering",
+        "subtitle": "We invest in the people who build our production lines as carefully as we build the lines themselves.",
+        "items": {
+          "environment": {
+            "title": "Professional Work Environment",
+            "text": "A modern, safety-first facility where engineering discipline and craftsmanship come first."
+          },
+          "growth": {
+            "title": "Career Growth",
+            "text": "Clear technical and leadership paths, mentorship from senior engineers, and room to specialize."
+          },
+          "international": {
+            "title": "International Projects",
+            "text": "Work on turnkey production lines commissioned for producers across 42 countries."
+          },
+          "learning": {
+            "title": "Continuous Learning",
+            "text": "Structured onboarding, cross-discipline training, and support for certifications that matter."
+          }
+        }
+      },
+      "process": {
+        "badge": "How You Get Hired",
+        "title": "Our Hiring Process",
+        "subtitle": "A straightforward, transparent path from application to your first day at PITEX.",
+        "startApplication": "Start Your Application",
+        "steps": {
+          "application": "Application",
+          "cvReview": "CV Review",
+          "hrInterview": "HR Interview",
+          "techInterview": "Technical Interview",
+          "finalDecision": "Final Decision",
+          "welcome": "Welcome to PITEX"
+        }
+      },
+      "apply": {
+        "badge": "Apply Now",
+        "title": "Submit Your Application",
+        "subtitle": "Fill in your details below — you'll send your CV over WhatsApp as the final step.",
+        "info": {
+          "badge": "How It Works",
+          "heading": "Two Simple Steps to Apply",
+          "desc": "Tell us about yourself in the form, then send your CV directly to our HR team on WhatsApp — no uploads, no portals.",
+          "stepOneLabel": "Step One",
+          "stepOneValue": "Submit the form with your details",
+          "stepTwoLabel": "Step Two",
+          "stepTwoValue": "Send your CV via WhatsApp",
+          "emailLabel": "Or Email HR",
+          "replyBadge": "HR replies within 48h",
+          "hiringBadge": "Hiring Worldwide"
+        },
+        "form": {
+          "fullName": "Full Name",
+          "fullNameError": "Please enter your full name.",
+          "email": "Email Address",
+          "phone": "Phone Number",
+          "country": "Country",
+          "countryPlaceholder": "Italy",
+          "countryError": "Please enter your country.",
+          "position": "Position Applying For",
+          "selectPosition": "Select a position",
+          "positionError": "Please select a position.",
+          "positions": {
+            "mechanical": "Mechanical Engineer",
+            "electrical": "Electrical Engineer",
+            "production": "Production Engineer",
+            "sales": "Sales Engineer",
+            "maintenance": "Maintenance Engineer",
+            "other": "Other / Future Opportunity"
+          },
+          "experience": "Years of Experience",
+          "selectExperience": "Select experience",
+          "experienceError": "Please select your experience range.",
+          "experiences": {
+            "e01": "0–1 years",
+            "e13": "1–3 years",
+            "e35": "3–5 years",
+            "e510": "5–10 years",
+            "e10plus": "10+ years"
+          },
+          "linkedin": "LinkedIn Profile",
+          "optional": "(optional)",
+          "message": "Message",
+          "messagePlaceholder": "Tell us why you'd be a great fit for PITEX…",
+          "messageError": "Please enter at least 10 characters.",
+          "agree": "I agree to the <a href=\"#\">privacy policy</a> and consent to PITEX contacting me about this application.",
+          "submit": "Submit Application",
+          "submitting": "Submitting…",
+          "submitted": "Submitted"
+        }
+      },
+      "successModal": {
+        "title": "Application Submitted Successfully",
+        "text": "Thank you for your interest in joining PITEX. Your application information has been received successfully. The final step is to send your CV via WhatsApp so our HR team can review your profile.",
+        "sendWhatsapp": "Send CV via WhatsApp"
+      },
+      "faq": {
+        "badge": "Careers",
+        "title": "Frequently Asked Questions",
+        "desc": "Everything you need to know before you apply — from how long recruitment takes to what happens if there's no open role for you today.",
+        "supportLive": "HR team online",
+        "supportTitle": "Have a Question?",
+        "supportText": "Reach out to our HR team directly and we'll help you find the right role at PITEX.",
+        "supportCta": "Contact HR",
+        "items": {
+          "apply": {
+            "q": "How do I apply?",
+            "a": "Fill in the application form on this page, then send your CV to our HR team through the WhatsApp link shown after you submit — no account or upload portal required."
+          },
+          "timeline": {
+            "q": "How long does recruitment take?",
+            "a": "Most roles move from application to offer within two to three weeks, covering CV review, an HR interview and a technical interview with the relevant team lead."
+          },
+          "noExperience": {
+            "q": "Can I apply without experience?",
+            "a": "Yes. Select the \"0–1 years\" experience range on the form — we regularly bring in junior engineers and pair them with senior mentors as part of onboarding."
+          },
+          "futureCv": {
+            "q": "Can I submit my CV for future opportunities?",
+            "a": "Absolutely — choose \"Other / Future Opportunity\" as the position on the form. We keep speculative applications on file and reach out when a matching role opens."
+          }
+        }
+      },
+      "finalCta": {
+        "badge": "Join Our Team",
+        "title": "Ready to Build Your Career with PITEX?",
+        "desc": "Explore our open roles, meet the team behind our production lines, and take the first step toward a career in precision engineering.",
+        "contactHr": "Contact HR",
+        "exploreProductionLines": "Explore Production Lines"
+      }
+    },
+    "contact": {
+      "hero": {
+        "title": "Contact <span class=\"text-accent\">Us</span>",
+        "desc": "We're here to answer your questions and help you find the right solution for your needs.",
+        "chip": "Available for International Projects"
+      },
+      "getInTouch": {
+        "eyebrow": "CONTACT",
+        "title": "Get In Touch",
+        "desc": "Have a question or need more information? Reach out to our team.",
+        "items": {
+          "phone": {
+            "label": "Phone"
+          },
+          "email": {
+            "label": "Email"
+          },
+          "address": {
+            "label": "Address"
+          },
+          "hours": {
+            "label": "Working Hours"
+          }
+        }
+      },
+      "help": {
+        "eyebrow": "SEND A MESSAGE",
+        "title": "How Can We Help?",
+        "desc": "Whether you have a complaint, inquiry, or request, our team is ready to assist you."
+      },
+      "form": {
+        "fields": {
+          "fullName": "Full Name",
+          "fullNameError": "Please enter your full name.",
+          "fullNamePlaceholder": "Enter your full name",
+          "email": "Email Address",
+          "emailPlaceholder": "Enter your email",
+          "phone": "Phone Number",
+          "subject": "Subject",
+          "subjectPlaceholder": "Inquiry or complaint",
+          "subjectError": "Please enter a subject.",
+          "message": "Message",
+          "messagePlaceholder": "How can our engineers help?",
+          "messageError": "Please enter at least 10 characters.",
+          "submit": "Send Message",
+          "submitting": "Sending…",
+          "submitted": "Message Sent"
+        },
+        "success": {
+          "title": "Message Sent Successfully",
+          "text": "Thank you for reaching out. A PITEX engineer will review your message and get back to you within 24 hours."
+        }
+      },
+      "connect": {
+        "eyebrow": "CONNECT",
+        "title": "Connect With Us",
+        "desc": "Follow PITEX and stay updated with our latest news, projects, and solutions.",
+        "caption": "Engineered in Italy · Installed Worldwide"
+      },
+      "map": {
+        "badge": "LOCATION",
+        "title": "Find Us",
+        "subtitle": "Visit our location or explore where we are based.",
+        "cardTitle": "Our Location",
+        "addressLabel": "Address",
+        "phoneLabel": "Phone",
+        "hoursLabel": "Working Hours",
+        "getDirections": "Get Directions",
+        "openInMaps": "Open in Maps"
+      },
+      "finalCta": {
+        "title": "Let's Build the Right Solution Together",
+        "desc": "Have a project in mind or need more information about our production lines? Our team is ready to help.",
+        "exploreLines": "Explore Production Lines",
+        "aboutPitex": "About PITEX"
+      }
+    },
+    "about": {
+      "pageBanner": {
+        "title": "Our Story"
+      },
+      "story": {
+        "badge": "Our Story",
+        "title": "Three decades pursuing a single uncompromising standard.",
+        "desc1": "Founded in the heart of Italy's industrial valley, PITEX began as a small precision tooling workshop with a single conviction: that olive oil production deserves the same engineering rigor as any high-performance machine. That conviction has since carried us into 42 countries, working alongside the world's most demanding producers.",
+        "desc2": "Today, we sit at the intersection of traditional craftsmanship and Industry 4.0 — designing, manufacturing and commissioning turnkey extraction systems engineered for maximum yield, uncompromising quality, and decades of reliable operation.",
+        "stats": {
+          "years": "Years of Experience",
+          "countries": "Countries Served",
+          "projects": "Projects Completed",
+          "satisfaction": "Client Satisfaction"
+        }
+      },
+      "missionVision": {
+        "badge": "About Pitex",
+        "title": "Purpose Beyond Profit",
+        "subtitle": "Our mission is to empower global industry through intelligent engineering, while our vision looks toward a sustainable, automated future.",
+        "mission": {
+          "title": "Our Mission",
+          "text": "To provide high-precision industrial components that exceed global standards of quality and efficiency."
+        },
+        "vision": {
+          "title": "Our Vision",
+          "text": "To become the universal benchmark for Industry 4.0 integration and sustainable manufacturing by 2030."
+        },
+        "goals": {
+          "title": "Goals",
+          "text": "Precision, integrity and relentless improvement guide every line we engineer and every client relationship we build."
+        },
+        "quote": {
+          "text": "Precision is not a specification we meet — it is the standard we refuse to compromise.",
+          "attribution": "PITEX Engineering Philosophy"
+        }
+      },
+      "whyUs": {
+        "badge": "Why Choose Us",
+        "title": "Built for Performance. Trusted for Decades.",
+        "subtitle": "Five reasons producers around the world choose PITEX to design, build and support their production lines.",
+        "badges": {
+          "yearsExperience": "Years Experience",
+          "globalExport": "Global Export",
+          "qualityStandards": "High Quality Standards"
+        },
+        "items": {
+          "engineering": {
+            "title": "Advanced Engineering",
+            "text": "Precision-engineered systems built in-house for maximum reliability and yield."
+          },
+          "quality": {
+            "title": "Premium Quality Standards",
+            "text": "Certified AISI 304/316 stainless steel, tested to strict international benchmarks."
+          },
+          "tailored": {
+            "title": "Tailored Production Solutions",
+            "text": "Every line configured around your facility's footprint, capacity and process."
+          },
+          "support": {
+            "title": "Global Installation & Support",
+            "text": "On-site commissioning and rapid technical support across 40+ countries."
+          },
+          "experience": {
+            "title": "Trusted Industry Experience",
+            "text": "Three decades of engineering expertise behind every system we deliver."
+          }
+        }
+      },
+      "journey": {
+        "badge": "Our Journey",
+        "title": "Three Decades of Engineering Progress",
+        "subtitle": "From a small precision workshop to a global extraction-systems leader — the milestones that shaped PITEX.",
+        "badgeText": "Engineering Since 1996",
+        "ariaLabel": "PITEX company milestones, six entries",
+        "today": "Today",
+        "milestones": {
+          "foundation": {
+            "title": "Foundation",
+            "text": "A small precision workshop opens in Italy's industrial valley, built on uncompromising tolerances."
+          },
+          "firstExport": {
+            "title": "First Export",
+            "text": "Our first turnkey extraction line ships abroad, opening the first of 42 export markets."
+          },
+          "isoCertified": {
+            "title": "ISO Certified",
+            "text": "PITEX earns ISO certification, the manufacturing standard that still governs every line we build."
+          },
+          "turnkeyDivision": {
+            "title": "Turnkey Division",
+            "text": "A dedicated turnkey division launches, taking projects from blueprint to commissioning in-house."
+          },
+          "industry40": {
+            "title": "Industry 4.0",
+            "text": "AI-assisted monitoring and automated production lines are integrated across our facility."
+          },
+          "globalLeadership": {
+            "title": "Global Leadership",
+            "text": "500+ projects delivered across 42 countries, with a 98% client satisfaction rate."
+          }
+        }
+      },
+      "faq": {
+        "badge": "Quick Answers",
+        "title": "Frequently Asked Questions",
+        "desc": "Straight answers to the questions clients ask most before committing to a production line — from customization and certification to installation and ongoing support.",
+        "supportLive": "Support team online",
+        "supportTitle": "Need More Help?",
+        "supportText": "Can’t find what you’re looking for? Our engineering team is ready to walk through your project’s technical specifics.",
+        "supportCta": "Contact Our Experts",
+        "items": {
+          "turnkey": {
+            "q": "Do you provide turnkey olive oil production lines?",
+            "a": "Yes. We design, manufacture and commission complete turnkey lines — from fruit reception through extraction, separation and storage — engineered and delivered as a single integrated system rather than assembled components."
+          },
+          "customized": {
+            "q": "Can your machines be customized?",
+            "a": "Every line starts from your throughput, fruit variety and footprint. Our engineers adapt capacity, automation level and layout so the finished system integrates cleanly with your existing facility."
+          },
+          "certifications": {
+            "q": "What certifications do your production lines meet?",
+            "a": "All PITEX lines are engineered under ISO 9001:2015 quality management and meet CE machinery safety directives, with food-contact materials certified for direct edible oil handling."
+          },
+          "installation": {
+            "q": "How do you handle installation and commissioning?",
+            "a": "A dedicated engineering crew manages on-site installation, calibration and commissioning, then trains your operators before final sign-off — so the line runs at full capacity from day one."
+          }
+        }
+      }
+    },
+    "products": {
+      "docTitle": "{{label}} | PITEX Production Lines",
+      "badge": "PITEX Production Line",
+      "scrollAria": "Scroll to line overview",
+      "aboutBadge": "About This Line",
+      "galleryBadge": "Line Gallery",
+      "galleryTitle": "Every Angle of This Line",
+      "workflowBadge": "Full Production Journey",
+      "workflowTitle": "From Grading to Roasting",
+      "workflowSubtitle": "Every PITEX machine is one stage in a single continuous process — {{label}} is highlighted below.",
+      "youAreHere": "You Are Here",
+      "machinesBadge": "Machines Included",
+      "machinesTitle": "{{label}} Machines",
+      "ctaBadge": "Need Help Selecting?",
+      "ctaTitle": "Need Help Choosing the Right Production Line?",
+      "ctaSubtitle": "Our engineering team is ready to help you select the ideal solution for your production requirements."
+    }
+  }
+}

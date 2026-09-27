@@ -1,0 +1,109 @@
+/* =========================================================================
+   PITEX — Animation Styles
+   Pre-JS states so the page still reads sensibly if scripts fail. The
+   `.js-anim` class (added by main.js when motion is allowed) gates every
+   rule here — without it, everything renders in its final, visible state.
+   ========================================================================= */
+
+.js-anim .gsap-fade-up {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+.js-anim .gsap-slide-left {
+  opacity: 0;
+  transform: translateX(-60px);
+}
+
+.js-anim .gsap-slide-right {
+  opacity: 0;
+  transform: translateX(60px);
+}
+
+.js-anim .gsap-scale-in {
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+.js-anim .gsap-stagger-item {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+/* ---------- Word split (headings) ---------- */
+.split-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.12em; /* keeps descenders (g, y, p) from clipping */
+  margin-bottom: -0.12em;
+}
+.split-word {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+}
+.js-anim .split-word {
+  opacity: 0;
+  transform: translateY(115%) rotate(6deg);
+  filter: blur(10px);
+}
+
+/* ---------- Line split (paragraphs) ---------- */
+.line-mask {
+  display: block;
+  overflow: hidden;
+}
+.line-inner {
+  display: block;
+  will-change: transform, opacity;
+}
+.js-anim .line-inner {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+/* ---------- Process timeline line ----------
+   Visible/full by default (style.css sets scaleX(1)) so the page still
+   reads correctly without JS; only hidden to scaleX(0)/scaleY(0) once
+   main.js confirms motion is allowed, then GSAP tweens it back in. */
+.js-anim .timeline-line__fill {
+  transform: scaleX(0);
+}
+
+@media (max-width: 767.98px) {
+  .js-anim .timeline-line__fill {
+    transform: scaleY(0);
+  }
+}
+
+/* Idle/hover motion elements start neutral; GSAP takes over entirely
+   once JS runs, so no pre-hidden state is needed for these. */
+.cert-card,
+.about-media__frame img,
+.feature-card,
+.card-icon,
+.btn-primary-custom,
+.btn-outline-custom,
+.timeline-icon,
+.timeline-number,
+.solution-card,
+.solution-media img,
+.solution-title,
+.solution-link {
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-anim .gsap-fade-up,
+  .js-anim .gsap-slide-left,
+  .js-anim .gsap-slide-right,
+  .js-anim .gsap-scale-in,
+  .js-anim .gsap-stagger-item,
+  .js-anim .split-word,
+  .js-anim .line-inner,
+  .js-anim .timeline-line__fill {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}

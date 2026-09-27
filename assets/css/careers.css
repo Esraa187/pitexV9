@@ -1,0 +1,281 @@
+/* =========================================================================
+   PITEX — careers.css
+   Page-specific additions ONLY for the Careers page. Everything else is
+   reused verbatim from the shared design system:
+     - Hero            → .page-banner (page-banner.css, page-banner.js)
+     - Why Join PITEX  → .applications-section / .application-card, which
+                         is .card + .feature-card underneath, so glass,
+                         border-glow, hover sweep and icon color-fill all
+                         come from style.css's Features section rules —
+                         nothing about the card shell is redefined here.
+                         Entrance + icon micro-interaction is already wired
+                         generically by initApplicationCards() in main.js.
+     - Hiring Process  → .process-section / .timeline(-item/-icon/-number/
+                         -title), driven end-to-end by initTimeline() /
+                         initTimelineInteractions() in main.js — no new
+                         CSS or JS needed for the timeline itself.
+     - Application form→ .contact-section / .contact-panel--info /
+                         .contact-panel--form / .form-group-custom /
+                         .form-input-custom / .contact-submit-btn, wired by
+                         initContactSection() in main.js for the entrance.
+     - FAQ             → .faq-section / .faq-accordion / .faq-item verbatim
+                         (About page component); accordion open/close logic
+                         is re-hooked in careers.js (initFaqAccordion is
+                         private to about.js, so the same small function is
+                         re-declared here rather than exporting internals).
+     - Final CTA       → .final-cta-section verbatim, auto-wired.
+
+   Genuinely new in this file: the job-opportunity cards, the "no openings"
+   note, minor select-element theming so <select> matches
+   .form-input-custom, and the post-submit success modal + its WhatsApp CTA.
+   ========================================================================= */
+
+/* =========================================================================
+   JOB OPPORTUNITY CARDS
+   Shell reuses .card + .feature-card (style.css) for glass background,
+   border-glow and hover sweep — only the internal layout is new. Cards
+   also carry .job-card so initCardTilt()'s generic `.feature-card`
+   selector (main.js) picks them up for free 3D tilt on hover.
+   ========================================================================= */
+.jobs-grid { margin-top: clamp(2.5rem, 4vw, 4rem); }
+
+.job-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: clamp(1.5rem, 2vw, 2rem);
+  border-radius: var(--radius-lg);
+}
+
+.job-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.job-card__dept {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.09);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+}
+
+.job-card__title {
+  margin: 0.6rem 0 0;
+  font-size: 1.15rem;
+}
+
+.job-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.job-card__meta li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+.job-card__meta i { color: var(--primary); font-size: 0.9rem; }
+
+.job-card__desc { margin: 0; flex: 1; }
+
+.job-card__exp {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--secondary);
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+}
+.job-card__exp i { color: var(--primary); }
+
+.job-card__apply {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
+/* ---------- Open positions come and go: standing note ---------- */
+.jobs-note {
+  margin-top: clamp(2rem, 3vw, 3rem);
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  padding: 1.5rem clamp(1.25rem, 3vw, 2rem);
+  border-radius: var(--radius-lg);
+}
+
+.jobs-note__icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(var(--primary-rgb), 0.09);
+  color: var(--primary);
+  font-size: 1.2rem;
+}
+
+.jobs-note__text { margin: 0; color: var(--text-light); font-size: 0.95rem; }
+.jobs-note__text strong { color: var(--secondary); }
+
+/* =========================================================================
+   FORM "(optional)" TAG — small addition to .form-label-custom for the
+   one non-required field (LinkedIn).
+   ========================================================================= */
+.form-optional-tag {
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--text-light);
+  opacity: 0.75;
+}
+
+/* =========================================================================
+   SELECT THEMING — makes <select class="form-input-custom"> match the
+   text-input styling from style.css exactly (border/radius/padding/focus
+   are already inherited; only the native chrome + custom arrow are new).
+   ========================================================================= */
+select.form-input-custom {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' fill='none' stroke='%23415A77' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+select.form-input-custom:invalid { color: var(--text-light); }
+
+/* =========================================================================
+   APPLICATION SUCCESS MODAL
+   Not a shared component elsewhere in the project, so its shell is new;
+   colors/radius/shadow tokens and .glass-card/.btn-primary-custom/
+   .btn-outline-custom are reused verbatim, nothing about those is
+   redeclared here.
+   ========================================================================= */
+.app-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.app-modal.is-open {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.app-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 16, 28, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.app-modal__panel {
+  position: relative;
+  width: min(480px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: center;
+  padding: clamp(2rem, 4vw, 2.75rem) clamp(1.75rem, 4vw, 2.5rem);
+  border-radius: var(--radius-xl);
+  background: var(--bg);
+  box-shadow: 0 40px 100px rgba(3, 13, 26, 0.35);
+}
+
+.app-modal__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(var(--primary-rgb), 0.08);
+  color: var(--text-light);
+  transition: background 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+.app-modal__close:hover { background: rgba(var(--primary-rgb), 0.14); color: var(--primary); transform: rotate(90deg); }
+
+.app-modal__icon {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary);
+  font-size: 2.1rem;
+}
+
+.app-modal__title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--secondary);
+  margin-bottom: 0.85rem;
+}
+
+.app-modal__text {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 1.75rem;
+}
+
+.app-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.app-modal__actions .btn-primary-custom,
+.app-modal__actions .btn-outline-custom {
+  width: 100%;
+  justify-content: center;
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+@media (max-width: 767.98px) {
+  .job-card__head { flex-direction: column; gap: 0.5rem; }
+  .jobs-note { flex-direction: column; text-align: center; }
+}

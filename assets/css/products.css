@@ -1,0 +1,148 @@
+/* =========================================================================
+   PITEX — Products page (Production Line Details template)
+   Adds only what utilities.css / style.css / production-lines.css /
+   product-details.css don't already provide. Reuses: .page-banner*
+   (page-banner.css — compact internal-page hero, same component as About/
+   Leadership/Certificates/Services/Gallery/Contact), .showcase-grid /
+   .showcase-info* / .showcase-badges / .showcase-actions (product-details.css
+   — the "About This Line + Gallery" info panel, already linked here for the
+   Request Quote modal), .showcase-media / .showcase-main / .showcase-thumbs /
+   .lightbox* (production-lines.css — the interactive gallery + fullscreen
+   viewer, same component and behaviour as product-details.html), .feature-
+   badge (production-lines.css — spec badges on the light showcase-info
+   background), .product-card (production-lines.css — Machines Included
+   cards, stripped to image + title only via .machine-card__body/
+   .machine-card__title below), .btn-primary-custom / .btn-outline-custom
+   (utilities.css), .cta-band (production-lines.css), .glass-card / .eyebrow
+   / .section-* (utilities.css), .quote-modal / .quote-field / .quote-toast
+   (product-details.css — same Request Quote component, not duplicated here).
+   NOTE ON MOTION OWNERSHIP: same split as the rest of the site — GSAP
+   (products.js) owns every transform; CSS here only owns static layout
+   and non-transform hover affordances.
+   ========================================================================= */
+
+
+
+/* ---------- ABOUT THIS LINE + GALLERY ----------
+   One merged showcase: line info (left) + interactive main-image/thumbnail
+   gallery (right) — reuses .showcase-grid/.showcase-info* (product-
+   details.css) and .showcase-media/.showcase-main/.showcase-thumbs
+   (production-lines.css) as-is. DOM order is info-first, gallery-second, so
+   the grid's two columns land info-left/gallery-right on desktop; below the
+   shared .showcase-grid breakpoint (991.98px) it collapses to one column
+   and stacks info above the gallery automatically — no extra CSS needed for
+   that part. Only the desktop column ratio (a touch more room for the
+   gallery than product-details.html's mirrored layout) and a couple of
+   small spacing tweaks are added here. */
+.about-line-section { position: relative; }
+
+.about-line-info .showcase-info__desc { max-width: 54ch; }
+
+/* This page's gallery doesn't use product-details.html's vertical-thumb-
+   column variant (.showcase-gallery), just the plain stacked .showcase-
+   media (main image, thumbnail row below) — so the hover hint doesn't need
+   the thumb-column offset that rule assumes. */
+.about-line-grid .showcase-hover-hint { margin-left: 0; }
+
+@media (min-width: 992px) {
+  .about-line-grid { grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); }
+}
+
+/* Two-button variant of .cta-band__actions (Request Quotation + Contact
+   Us) — the base rule only centers a single action. */
+.cta-band__actions--split {
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ---------- PRODUCTION WORKFLOW ---------- */
+/* Reuses .timeline (style.css) as-is with a fixed, complete set of
+   process stages (products.js); only the current category's stage(s)
+   get the .is-current highlight. */
+.workflow-section .timeline-item { text-decoration: none; }
+.workflow-section .timeline-item.is-current .timeline-icon {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 0 0 8px rgba(var(--primary-rgb), 0.14), 0 14px 30px rgba(var(--primary-rgb), 0.4);
+}
+.workflow-section .timeline-item.is-current .timeline-title { color: var(--primary); }
+.workflow-current-tag {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-top: 0.2rem;
+}
+
+/* ---------- MACHINES INCLUDED — large, image-led premium grid ----------
+   Reuses .product-card as the shell (production-lines.css): the border,
+   the box-shadow transition, and the hover lift + image-scale animation
+   from wireProductCards() (products-data.js) are all untouched — only
+   visual sizing/spacing is refined here. Every card shares one fixed
+   aspect-ratio, so height stays identical across the whole grid at any
+   column width instead of depending on card content. */
+.products-grid-section { position: relative; }
+.products-grid-section .section-header { margin-bottom: 0; }
+
+.machines-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(1.1rem, 2vw, 1.75rem);
+  margin-top: clamp(2.5rem, 4vw, 4rem);
+  align-items: start;
+}
+
+.machines-grid .product-card {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  border-radius: 18px;
+  cursor: default;
+}
+/* Lower-specificity selector on purpose: .product-card:hover (production-
+   lines.css) must still win while hovering so the shadow keeps growing —
+   this only sets the resting-state shadow. */
+.machine-card { box-shadow: var(--shadow-sm); }
+
+/* Image — the card's main focus, ~75% of the card height, always fully
+   visible (object-fit: contain) on a plain white field so every machine
+   photo (whatever its own proportions) reads consistently. */
+.machines-grid .product-card__media {
+  flex: 3 1 0;
+  aspect-ratio: unset;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.85rem, 2vw, 1.5rem);
+}
+.machines-grid .product-card__media img { width: 100%; height: 100%; object-fit: cover; border-radius: 5px;}
+
+/* Name only — compact, centered, the remaining ~25% of the card. */
+.machine-card__body {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 1.1rem 1.1rem;
+}
+.machine-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+}
+.machines-grid .product-card:hover .machine-card__title { color: var(--primary); }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 991.98px) {
+  .machines-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767.98px) {
+  .machines-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+}

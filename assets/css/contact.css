@@ -1,0 +1,677 @@
+/* =========================================================================
+   PITEX — contact.css
+   Page-specific styles for the Contact Us page only. Reuses design tokens
+   from utilities.css (--primary/--shadow/--radius/--ease-premium),
+   .section-badge/.section-title/.section-subtitle/.section-description,
+   .breadcrumb-custom, .container-custom, .ambient-blob/.particle-field/
+   .ambient-particles, .card-sweep, .glass-card, .radius-xl/.shadow-soft
+   and every .btn-*-custom variant as-is — nothing here re-declares a
+   primitive that already exists elsewhere.
+
+   The How Can We Help form uses .form-group-custom / .form-input-custom /
+   .form-textarea-custom / .contact-submit-btn verbatim from style.css;
+   only the extra loading/success states, the form+Connect grid, and the
+   Connect panel's own content (social icons, decorative visual) are
+   added here. The closing CTA reuses .final-cta-section verbatim (wired
+   in via contact.html, no new CSS needed).
+
+   NOTE ON MOTION OWNERSHIP (same convention used sitewide): continuous
+   idle motion and hover transforms are GSAP-owned in contact.js. CSS here
+   owns static layout plus non-transform hover affordances (box-shadow,
+   border-color, background, opacity).
+   ========================================================================= */
+
+/* =========================================================================
+   HERO — small/compact variant of the shared page-hero language
+   (dark image + gradient overlay + breadcrumb + title), intentionally
+   shorter than the 88vh hero used on Production Lines/About/Certificates.
+   ========================================================================= */
+.page-hero--compact {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  min-height: min(46vh, 420px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.page-hero--compact .page-hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.page-hero--compact .page-hero__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.page-hero--compact .page-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(var(--primary-rgb), 0.93) 0%, rgba(3, 13, 26, 0.9) 100%);
+}
+.glass-card-banner {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.page-banner__crumb {
+  display: inline-flex;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+}
+
+.breadcrumb-custom a {
+    color: rgba(255, 255, 255, 0.9);
+    transition: color 0.5s ease;
+}
+.breadcrumb-custom i {
+    font-size: 0.7rem;
+    color: #ddd;
+}
+.breadcrumb-custom span[aria-current] {
+    color: #fff;
+}
+
+/* Soft glass sheen across the lower edge, ties the compact hero to the
+   glass-card language used throughout the rest of the page. */
+.page-hero--compact::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 40%;
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.06) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-hero--compact .page-hero__inner {
+  position: relative;
+  z-index: 1;
+  padding-block: clamp(2.5rem, 5vw, 3.5rem);
+  max-width: 760px;
+  text-align: center;
+}
+
+.page-hero--compact .page-hero__title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2rem, 1.5rem + 2.2vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin: 1rem 0 0;
+}
+
+
+.page-hero--compact .page-hero__desc {
+  font-size: var(--fs-subtitle);
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.7;
+  margin-top: 1.1rem;
+  max-width: 60ch;
+}
+
+/* Availability status chip — "Available for International Projects" */
+.availability-chip {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1.5rem;
+  padding: 0.5rem 1rem 0.5rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+}
+.availability-chip__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #37d67a;
+  box-shadow: 0 0 0 3px rgba(55, 214, 122, 0.28);
+  flex-shrink: 0;
+  position: relative;
+}
+.availability-chip__dot::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(55, 214, 122, 0.6);
+  animation: chip-pulse 2.4s ease-out infinite;
+}
+@keyframes chip-pulse {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* =========================================================================
+   GET IN TOUCH — minimal contact-info row (Phone / Email / Address /
+   Working Hours). Deliberately NOT a card grid: no shadows, just an
+   icon centered above a label and value, with a thin divider between
+   items, per the "elegant and minimal" brief. Horizontal on desktop,
+   stacked on mobile. Reuses .contact-icon-sm (declared further down,
+   next to the map panel) so the same small icon-chip language is used
+   in both places on this page.
+   ========================================================================= */
+.get-in-touch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.get-in-touch-item {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.85rem;
+  padding: clamp(2.25rem, 1.7rem + 2vw, 3rem) clamp(1.25rem, 1vw + 1rem, 1.75rem);
+  border-inline-end: 1px solid var(--border);
+  transition: background 0.6s ease;
+}
+.get-in-touch-item:last-child { border-inline-end: none; }
+.get-in-touch-item:hover { background: rgba(var(--primary-rgb), 0.04); }
+.get-in-touch-item:hover .contact-icon-sm {
+  background: var(--primary);
+  color: #fff;
+}
+
+.get-in-touch-item__label {
+  margin: 0;
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+
+.get-in-touch-item__value {
+  display: block;
+  margin-top: 0.35rem;
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--secondary);
+  transition: color 0.5s ease;
+}
+a.get-in-touch-item__value:hover { color: var(--primary); }
+
+@media (max-width: 767.98px) {
+  .get-in-touch-row { flex-direction: column; }
+  .get-in-touch-item {
+    border-inline-end: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .get-in-touch-item:last-child { border-bottom: none; }
+}
+
+/* =========================================================================
+   HOW CAN WE HELP? — form panel + Connect With Us panel, side by side on
+   desktop. Uses the shared .form-group-custom/.form-input-custom/
+   .contact-submit-btn primitives from style.css verbatim for the fields
+   themselves; only the two-panel grid and the Connect panel's own
+   content (badge/heading/desc reused from .section-badge/.section-title
+   patterns, social icons, decorative visual) are new here.
+   ========================================================================= */
+.contact-help-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: clamp(1.75rem, 3vw, 2.5rem);
+  align-items: stretch;
+}
+
+.contact-help-panel {
+  padding: clamp(2rem, 1.6rem + 1.4vw, 2.75rem);
+  background: var(--bg);
+}
+
+.contact-help-panel--form { border: 1px solid var(--border); }
+
+.contact-help-panel--connect {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    linear-gradient(165deg, rgba(var(--primary-rgb), 0.06) 0%, rgba(255, 255, 255, 0.92) 42%),
+    var(--bg);
+  border: 1px solid rgba(var(--primary-rgb), 0.14);
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-help-connect__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: var(--fs-badge);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.contact-help-connect__eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+.contact-help-connect__title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 1.85rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--secondary);
+  margin: 0.75rem 0 0;
+}
+
+.contact-help-connect__desc {
+  margin-top: 0.75rem;
+  max-width: 38ch;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-light);
+}
+
+.connect-social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.75rem;
+}
+.connect-social__link {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.08);
+  font-size: 1.3rem;
+  transition: transform 0.5s var(--ease-premium), background 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
+}
+.connect-social__link:hover,
+.connect-social__link:focus-visible {
+  transform: translateY(-4px);
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 12px 26px -10px rgba(var(--primary-rgb), 0.5);
+}
+
+.connect-visual {
+  position: relative;
+  margin-top: auto;
+  padding-top: clamp(1.75rem, 3vw, 2.25rem);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  isolation: isolate;
+}
+.connect-visual img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: clamp(150px, 18vw, 200px);
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+}
+.connect-visual::after {
+  content: '';
+  position: absolute;
+  inset: clamp(1.75rem, 3vw, 2.25rem) 0 0 0;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(0deg, rgba(3, 13, 26, 0.65) 0%, rgba(3, 13, 26, 0.05) 45%, transparent 65%);
+  pointer-events: none;
+}
+.connect-visual__caption {
+  position: absolute;
+  inset-inline: 1rem;
+  bottom: 0.9rem;
+  z-index: 1;
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+@media (max-width: 991.98px) {
+  .contact-help-grid { grid-template-columns: 1fr; }
+}
+
+.form-error-text {
+  display: none;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #dc2626;
+}
+.form-group-custom.has-error .form-input-custom {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.04);
+}
+.form-group-custom.has-error .form-error-text { display: block; }
+
+/* Submit button loading + success visual states. Structure/position
+   inherited from .contact-submit-btn (style.css); only the state-swap
+   affordances live here. */
+.contact-submit-btn .btn-state { display: inline-flex; align-items: center; gap: 0.6rem; }
+.contact-submit-btn .btn-spinner {
+  display: none;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: btn-spin 0.7s linear infinite;
+}
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+.contact-submit-btn.is-loading { pointer-events: none; opacity: 0.9; }
+.contact-submit-btn.is-loading .btn-spinner { display: inline-block; }
+.contact-submit-btn.is-loading .btn-label-default { display: none; }
+.contact-submit-btn .btn-label-loading,
+.contact-submit-btn .btn-label-success { display: none; }
+.contact-submit-btn.is-loading .btn-label-loading { display: inline; }
+.contact-submit-btn.is-success .btn-label-default,
+.contact-submit-btn.is-success .btn-spinner { display: none; }
+.contact-submit-btn.is-success .btn-label-success { display: inline; }
+.contact-submit-btn.is-success { background-image: none; background-color: #1a9d5c; }
+
+/* Animated success panel that replaces the form on submit. */
+.contact-success {
+  display: none;
+  text-align: center;
+  padding: clamp(2.5rem, 5vw, 3.5rem) 1rem;
+}
+.contact-success.is-visible { display: block; }
+.contact-success__icon {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #fff;
+  background: linear-gradient(160deg, #37d67a 0%, #1a9d5c 100%);
+  box-shadow: 0 16px 40px rgba(26, 157, 92, 0.35);
+}
+.contact-success__title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--secondary);
+  margin: 0 0 0.6rem;
+}
+.contact-success__text {
+  color: var(--text-light);
+  font-size: 0.98rem;
+  line-height: 1.65;
+  max-width: 42ch;
+  margin: 0 auto;
+}
+.contact-success__btn { margin-top: 1.75rem; }
+
+/* =========================================================================
+   MAP SECTION — the map itself is the section's visual surface (no card
+   wrapped around a card). A translucent info panel overlays one corner;
+   on small screens it detaches and sits below the map instead.
+   ========================================================================= */
+.contact-map-section { position: relative; overflow: hidden; isolation: isolate; }
+
+/* Two very soft blurred accents that blend the map into the page
+   background instead of leaving it floating in empty surface color. */
+.contact-map-section::before,
+.contact-map-section::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(60px);
+}
+.contact-map-section::before {
+  top: -12%;
+  inset-inline-end: -6%;
+  width: clamp(240px, 26vw, 440px);
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.14), transparent 70%);
+}
+.contact-map-section::after {
+  bottom: -14%;
+  inset-inline-start: -8%;
+  width: clamp(200px, 20vw, 360px);
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.08), transparent 70%);
+}
+
+.contact-map-layout {
+  position: relative;
+  z-index: 1;
+}
+
+/* Shared small icon-chip primitive — used by the Get In Touch row above
+   and (at a smaller size, via .contact-map-details__icon) the map panel
+   below, so both keep the same icon language. */
+.contact-icon-sm {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7rem;
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.08);
+  transition: background 0.5s ease, color 0.5s ease;
+}
+
+/* ---------- The map itself: no border, no boxed-card shadow. Rounded
+   corners and a hairline inner glow are enough to feel intentional
+   without reading as "widget pasted in a container". ---------- */
+.contact-map-frame {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  min-height: clamp(420px, 52vw, 560px);
+  box-shadow: 0 40px 90px -32px rgba(15, 23, 42, 0.22);
+  isolation: isolate;
+}
+
+.contact-map-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  filter: grayscale(0.2) contrast(1.02);
+}
+
+.contact-map-frame__glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  border-radius: inherit;
+}
+
+/* Soft gradient along the corner the info panel sits in, so light map
+   tiles never fight with the panel's text/contrast. */
+.contact-map-frame__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(0deg, rgba(10, 26, 48, 0.35) 0%, rgba(10, 26, 48, 0) 32%);
+}
+
+/* ---------- Location info panel — overlays the map's corner on desktop,
+   reads as part of the site (not a Google InfoWindow). ---------- */
+.contact-map-details {
+  position: absolute;
+  z-index: 2;
+  inset-block-end: clamp(1.1rem, 2.5vw, 2rem);
+  inset-inline-start: clamp(1.1rem, 2.5vw, 2rem);
+  width: min(340px, calc(100% - 2.2rem));
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: clamp(1.35rem, 1.5vw + 0.8rem, 1.85rem);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 50px -14px rgba(15, 23, 42, 0.28);
+}
+
+.contact-map-details__header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.contact-map-details__icon {
+  position: relative;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.1);
+}
+.contact-map-details__ping {
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 1.5px solid rgba(var(--primary-rgb), 0.5);
+  animation: chip-pulse 2.6s ease-out infinite;
+}
+
+.contact-map-details__title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--secondary);
+  margin: 0;
+}
+
+.contact-map-details__address {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-light);
+}
+
+.contact-map-details__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.1rem;
+}
+
+.contact-map-details__cta.btn-primary-custom {
+  padding: 0.65rem 1.2rem;
+  font-size: 0.85rem;
+  box-shadow: 0 10px 22px rgba(var(--primary-rgb), 0.3);
+}
+
+.contact-map-details__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-light);
+  transition: color 0.5s ease;
+}
+.contact-map-details__link i { font-size: 0.78rem; }
+.contact-map-details__link:hover { color: var(--primary); }
+
+/* =========================================================================
+   SECTION DIVIDERS — elegant thin gradient rule matching PITEX branding
+   ========================================================================= */
+.pitex-divider {
+  position: relative;
+  height: 1px;
+  border: none;
+  margin: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(var(--primary-rgb), 0.25) 50%, transparent 100%);
+}
+.pitex-divider::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.15);
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+@media (max-width: 991.98px) {
+  .contact-map-frame { min-height: 400px; }
+  .contact-map-details { width: min(300px, calc(100% - 1.8rem)); }
+}
+
+@media (max-width: 767.98px) {
+  .page-hero--compact { min-height: min(52vh, 460px); }
+
+  /* Panel detaches from the map and sits full-width beneath it — still
+     readable, still touch-friendly, no cramped overlay on small glass. */
+  .contact-map-frame { min-height: 300px; border-radius: var(--radius-lg); }
+  .contact-map-details {
+    position: static;
+    inset: auto;
+    width: 100%;
+    margin-top: 1rem;
+    background: var(--bg);
+    box-shadow: none;
+    border: 1px solid var(--border);
+  }
+  .contact-map-frame__vignette { display: none; }
+}
+
+@media (max-width: 420px) {
+  .contact-map-details__actions { flex-direction: column; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .get-in-touch-item,
+  .contact-help-panel--connect,
+  .connect-social__link,
+  .contact-map-details__ping {
+    transition-duration: 0.001ms;
+  }
+  .availability-chip__dot::after,
+  .contact-map-details__ping { animation: none; }
+}
